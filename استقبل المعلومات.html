@@ -29,9 +29,38 @@
             padding: 20px;
             margin-bottom: 20px;
             background: #f9f9f9;
+            position: relative;
         }
         .user-card p {
             margin: 5px 0;
+        }
+        .user-photo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #ddd;
+        }
+        .user-details {
+            margin-left: 120px; /* لترك مساحة للصورة */
+        }
+        .nav-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav-button a {
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .nav-button a:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -39,17 +68,22 @@
     <div class="container">
         <h1>عرض معلومات البطاقة الوطنية المغربية</h1>
         <div id="user-list"></div>
+
+        <!-- زر الانتقال إلى صفحة إدخال البيانات -->
+        <div class="nav-button">
+            <a href="index.html">انتقل إلى صفحة إدخال البيانات</a>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
             projectId: "new-project-d4813",
-            storageBucket: "new-project-d4813.firebasestorage.app",
+            storageBucket: "new-project-d4813.appspot.com",
             messagingSenderId: "1083380199863",
             appId: "1:1083380199863:web:004f2e1f639ff0a95e3832",
             measurementId: "G-1XJJGHR2W4"
@@ -58,6 +92,17 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // دالة لتحويل الملف إلى Base64
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // دالة لجلب وعرض البيانات
         async function getUsers() {
             const querySnapshot = await getDocs(collection(db, 'national_id_data'));
             const userList = document.getElementById('user-list');
@@ -67,7 +112,17 @@
                 const userData = doc.data();
                 const userElement = document.createElement('div');
                 userElement.className = 'user-card';
-                userElement.innerHTML = `
+
+                // إضافة الصورة الشخصية
+                const photoElement = document.createElement('img');
+                photoElement.src = userData.personalPhoto; // Base64
+                photoElement.alt = 'الصورة الشخصية';
+                photoElement.className = 'user-photo';
+
+                // إضافة تفاصيل المستخدم
+                const detailsElement = document.createElement('div');
+                detailsElement.className = 'user-details';
+                detailsElement.innerHTML = `
                     <p><strong>الاسم:</strong> ${userData.fullName}</p>
                     <p><strong>تاريخ الميلاد:</strong> ${userData.birthDate}</p>
                     <p><strong>الجنس:</strong> ${userData.gender}</p>
@@ -75,16 +130,22 @@
                     <p><strong>رقم البطاقة:</strong> ${userData.idNumber}</p>
                     <p><strong>تاريخ الإصدار:</strong> ${userData.issueDate}</p>
                     <p><strong>تاريخ الانتهاء:</strong> ${userData.expiryDate}</p>
-                    <p><strong>الصورة الشخصية:</strong> ${userData.personalPhoto}</p>
                     <p><strong>صورة البطاقة:</strong> ${userData.idPhoto}</p>
                     <p><strong>تاريخ الإدخال:</strong> ${userData.createdAt.toDate().toLocaleString()}</p>
                     <hr>
                 `;
+
+                // إضافة الصورة والتفاصيل إلى العنصر
+                userElement.appendChild(photoElement);
+                userElement.appendChild(detailsElement);
+
+                // إضافة العنصر إلى القائمة
                 userList.appendChild(userElement);
             });
         }
 
-        getUsers(); // استدعاء الدالة عند تحميل الصفحة
+        // استدعاء الدالة عند تحميل الصفحة
+        getUsers();
     </script>
 </body>
 </html>
