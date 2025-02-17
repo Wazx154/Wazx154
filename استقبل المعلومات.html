@@ -71,6 +71,18 @@
         .nav-button a:hover {
             background-color: #0056b3;
         }
+        .loading-spinner {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        .error-message {
+            text-align: center;
+            color: #dc3545;
+            font-size: 18px;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +121,18 @@
             لا توجد نتائج مطابقة للبحث.
         </div>
 
+        <!-- رسالة خطأ -->
+        <div id="error-message" class="error-message" style="display: none;">
+            حدث خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى لاحقًا.
+        </div>
+
+        <!-- مؤشر التحميل -->
+        <div id="loading-spinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
         <!-- زر الانتقال إلى صفحة إدخال البيانات -->
         <div class="nav-button">
             <a href="index.html">انتقل إلى صفحة إدخال البيانات</a>
@@ -134,50 +158,65 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // عناصر DOM
+        const userList = document.getElementById('user-list');
+        const noResultsMessage = document.getElementById('no-results');
+        const errorMessage = document.getElementById('error-message');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const searchInput = document.getElementById('search-input');
+
         // دالة لجلب وعرض البيانات
         async function getUsers(searchQuery = '') {
-            const querySnapshot = await getDocs(collection(db, 'national_id_data'));
-            const userList = document.getElementById('user-list');
-            const noResultsMessage = document.getElementById('no-results');
-            userList.innerHTML = ''; // مسح المحتوى القديم
+            try {
+                loadingSpinner.style.display = 'block'; // إظهار مؤشر التحميل
+                errorMessage.style.display = 'none'; // إخفاء رسالة الخطأ
 
-            let hasResults = false; // لتتبع وجود نتائج
+                const querySnapshot = await getDocs(collection(db, 'national_id_data'));
+                userList.innerHTML = ''; // مسح المحتوى القديم
 
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data();
+                let hasResults = false; // لتتبع وجود نتائج
 
-                // تحويل النص إلى أحرف صغيرة للبحث غير الحساس لحالة الأحرف
-                const fullName = (userData.fullName || '').toLowerCase();
-                const idNumber = (userData.idNumber || '').toLowerCase();
-                const searchTerm = searchQuery.toLowerCase();
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data();
 
-                // تصفية البيانات بناءً على نص البحث
-                if (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) {
-                    hasResults = true; // يوجد نتائج
+                    // تحويل النص إلى أحرف صغيرة للبحث غير الحساس لحالة الأحرف
+                    const fullName = (userData.fullName || '').toLowerCase();
+                    const idNumber = (userData.idNumber || '').toLowerCase();
+                    const searchTerm = searchQuery.toLowerCase();
 
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><img src="${userData.personalPhoto}" alt="الصورة الشخصية"></td>
-                        <td>${userData.fullName}</td>
-                        <td>${userData.birthDate}</td>
-                        <td>${userData.gender}</td>
-                        <td>${userData.address}</td>
-                        <td>${userData.idNumber}</td>
-                        <td>${userData.issueDate}</td>
-                        <td>${userData.expiryDate}</td>
-                        <td>${userData.createdAt.toDate().toLocaleString()}</td>
-                    `;
+                    // تصفية البيانات بناءً على نص البحث
+                    if (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) {
+                        hasResults = true; // يوجد نتائج
 
-                    // إضافة الصف إلى الجدول
-                    userList.appendChild(row);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><img src="${userData.personalPhoto}" alt="الصورة الشخصية"></td>
+                            <td>${userData.fullName}</td>
+                            <td>${userData.birthDate}</td>
+                            <td>${userData.gender}</td>
+                            <td>${userData.address}</td>
+                            <td>${userData.idNumber}</td>
+                            <td>${userData.issueDate}</td>
+                            <td>${userData.expiryDate}</td>
+                            <td>${userData.createdAt.toDate().toLocaleString()}</td>
+                        `;
+
+                        // إضافة الصف إلى الجدول
+                        userList.appendChild(row);
+                    }
+                });
+
+                // إظهار رسالة إذا لم توجد نتائج
+                if (!hasResults) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
                 }
-            });
-
-            // إظهار رسالة إذا لم توجد نتائج
-            if (!hasResults) {
-                noResultsMessage.style.display = 'block';
-            } else {
-                noResultsMessage.style.display = 'none';
+            } catch (error) {
+                console.error('حدث خطأ أثناء جلب البيانات:', error);
+                errorMessage.style.display = 'block'; // إظهار رسالة الخطأ
+            } finally {
+                loadingSpinner.style.display = 'none'; // إخفاء مؤشر التحميل
             }
         }
 
@@ -185,7 +224,6 @@
         getUsers();
 
         // إضافة حدث البحث
-        const searchInput = document.getElementById('search-input');
         searchInput.addEventListener('input', (event) => {
             const searchQuery = event.target.value.trim();
             getUsers(searchQuery);
