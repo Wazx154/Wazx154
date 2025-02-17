@@ -62,11 +62,32 @@
         .nav-button a:hover {
             background-color: #0056b3;
         }
+        .search-box {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .no-results {
+            text-align: center;
+            color: #777;
+            font-size: 18px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>عرض معلومات البطاقة الوطنية المغربية</h1>
+
+        <!-- حقل البحث -->
+        <div class="search-box">
+            <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
+        </div>
+
+        <!-- قائمة المستخدمين -->
         <div id="user-list"></div>
 
         <!-- زر الانتقال إلى صفحة إدخال البيانات -->
@@ -77,7 +98,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
@@ -92,60 +113,75 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // دالة لتحويل الملف إلى Base64
-        function toBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
         // دالة لجلب وعرض البيانات
-        async function getUsers() {
+        async function getUsers(searchQuery = '') {
             const querySnapshot = await getDocs(collection(db, 'national_id_data'));
             const userList = document.getElementById('user-list');
             userList.innerHTML = ''; // مسح المحتوى القديم
 
+            let hasResults = false; // لتتبع وجود نتائج
+
             querySnapshot.forEach((doc) => {
                 const userData = doc.data();
-                const userElement = document.createElement('div');
-                userElement.className = 'user-card';
 
-                // إضافة الصورة الشخصية
-                const photoElement = document.createElement('img');
-                photoElement.src = userData.personalPhoto; // Base64
-                photoElement.alt = 'الصورة الشخصية';
-                photoElement.className = 'user-photo';
+                // تحويل النص إلى أحرف صغيرة للبحث غير الحساس لحالة الأحرف
+                const fullName = (userData.fullName || '').toLowerCase();
+                const idNumber = (userData.idNumber || '').toLowerCase();
+                const searchTerm = searchQuery.toLowerCase();
 
-                // إضافة تفاصيل المستخدم
-                const detailsElement = document.createElement('div');
-                detailsElement.className = 'user-details';
-                detailsElement.innerHTML = `
-                    <p><strong>الاسم:</strong> ${userData.fullName}</p>
-                    <p><strong>تاريخ الميلاد:</strong> ${userData.birthDate}</p>
-                    <p><strong>الجنس:</strong> ${userData.gender}</p>
-                    <p><strong>العنوان:</strong> ${userData.address}</p>
-                    <p><strong>رقم البطاقة:</strong> ${userData.idNumber}</p>
-                    <p><strong>تاريخ الإصدار:</strong> ${userData.issueDate}</p>
-                    <p><strong>تاريخ الانتهاء:</strong> ${userData.expiryDate}</p>
-                    <p><strong>صورة البطاقة:</strong> ${userData.idPhoto}</p>
-                    <p><strong>تاريخ الإدخال:</strong> ${userData.createdAt.toDate().toLocaleString()}</p>
-                    <hr>
-                `;
+                // تصفية البيانات بناءً على نص البحث
+                if (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) {
+                    hasResults = true; // يوجد نتائج
 
-                // إضافة الصورة والتفاصيل إلى العنصر
-                userElement.appendChild(photoElement);
-                userElement.appendChild(detailsElement);
+                    const userElement = document.createElement('div');
+                    userElement.className = 'user-card';
 
-                // إضافة العنصر إلى القائمة
-                userList.appendChild(userElement);
+                    // إضافة الصورة الشخصية
+                    const photoElement = document.createElement('img');
+                    photoElement.src = userData.personalPhoto; // Base64
+                    photoElement.alt = 'الصورة الشخصية';
+                    photoElement.className = 'user-photo';
+
+                    // إضافة تفاصيل المستخدم
+                    const detailsElement = document.createElement('div');
+                    detailsElement.className = 'user-details';
+                    detailsElement.innerHTML = `
+                        <p><strong>الاسم:</strong> ${userData.fullName}</p>
+                        <p><strong>تاريخ الميلاد:</strong> ${userData.birthDate}</p>
+                        <p><strong>الجنس:</strong> ${userData.gender}</p>
+                        <p><strong>العنوان:</strong> ${userData.address}</p>
+                        <p><strong>رقم البطاقة:</strong> ${userData.idNumber}</p>
+                        <p><strong>تاريخ الإصدار:</strong> ${userData.issueDate}</p>
+                        <p><strong>تاريخ الانتهاء:</strong> ${userData.expiryDate}</p>
+                        <p><strong>صورة البطاقة:</strong> ${userData.idPhoto}</p>
+                        <p><strong>تاريخ الإدخال:</strong> ${userData.createdAt.toDate().toLocaleString()}</p>
+                        <hr>
+                    `;
+
+                    // إضافة الصورة والتفاصيل إلى العنصر
+                    userElement.appendChild(photoElement);
+                    userElement.appendChild(detailsElement);
+
+                    // إضافة العنصر إلى القائمة
+                    userList.appendChild(userElement);
+                }
             });
+
+            // إظهار رسالة إذا لم توجد نتائج
+            if (!hasResults) {
+                userList.innerHTML = '<p class="no-results">لا توجد نتائج مطابقة للبحث.</p>';
+            }
         }
 
         // استدعاء الدالة عند تحميل الصفحة
         getUsers();
+
+        // إضافة حدث البحث
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', (event) => {
+            const searchQuery = event.target.value.trim();
+            getUsers(searchQuery);
+        });
     </script>
 </body>
 </html>
