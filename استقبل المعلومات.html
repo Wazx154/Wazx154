@@ -23,29 +23,37 @@
             margin-bottom: 20px;
             color: #333;
         }
-        .user-card {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
+        .search-box {
+            text-align: center;
             margin-bottom: 20px;
-            background: #f9f9f9;
-            position: relative;
         }
-        .user-card p {
-            margin: 5px 0;
+        .search-box input {
+            max-width: 400px;
+            margin: 0 auto;
         }
-        .user-photo {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 100px;
-            height: 100px;
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .table thead {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table img {
+            width: 80px;
+            height: 80px;
             border-radius: 10px;
             object-fit: cover;
             border: 2px solid #ddd;
         }
-        .user-details {
-            margin-left: 120px; /* لترك مساحة للصورة */
+        .no-results {
+            text-align: center;
+            color: #777;
+            font-size: 18px;
+            margin-top: 20px;
         }
         .nav-button {
             text-align: center;
@@ -62,20 +70,6 @@
         .nav-button a:hover {
             background-color: #0056b3;
         }
-        .search-box {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .search-box input {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        .no-results {
-            text-align: center;
-            color: #777;
-            font-size: 18px;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -87,8 +81,32 @@
             <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
         </div>
 
-        <!-- قائمة المستخدمين -->
-        <div id="user-list"></div>
+        <!-- جدول عرض البيانات -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>الصورة الشخصية</th>
+                        <th>الاسم</th>
+                        <th>تاريخ الميلاد</th>
+                        <th>الجنس</th>
+                        <th>العنوان</th>
+                        <th>رقم البطاقة</th>
+                        <th>تاريخ الإصدار</th>
+                        <th>تاريخ الانتهاء</th>
+                        <th>تاريخ الإدخال</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list">
+                    <!-- البيانات ستظهر هنا -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- رسالة عدم وجود نتائج -->
+        <div id="no-results" class="no-results" style="display: none;">
+            لا توجد نتائج مطابقة للبحث.
+        </div>
 
         <!-- زر الانتقال إلى صفحة إدخال البيانات -->
         <div class="nav-button">
@@ -117,6 +135,7 @@
         async function getUsers(searchQuery = '') {
             const querySnapshot = await getDocs(collection(db, 'national_id_data'));
             const userList = document.getElementById('user-list');
+            const noResultsMessage = document.getElementById('no-results');
             userList.innerHTML = ''; // مسح المحتوى القديم
 
             let hasResults = false; // لتتبع وجود نتائج
@@ -133,43 +152,29 @@
                 if (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) {
                     hasResults = true; // يوجد نتائج
 
-                    const userElement = document.createElement('div');
-                    userElement.className = 'user-card';
-
-                    // إضافة الصورة الشخصية
-                    const photoElement = document.createElement('img');
-                    photoElement.src = userData.personalPhoto; // Base64
-                    photoElement.alt = 'الصورة الشخصية';
-                    photoElement.className = 'user-photo';
-
-                    // إضافة تفاصيل المستخدم
-                    const detailsElement = document.createElement('div');
-                    detailsElement.className = 'user-details';
-                    detailsElement.innerHTML = `
-                        <p><strong>الاسم:</strong> ${userData.fullName}</p>
-                        <p><strong>تاريخ الميلاد:</strong> ${userData.birthDate}</p>
-                        <p><strong>الجنس:</strong> ${userData.gender}</p>
-                        <p><strong>العنوان:</strong> ${userData.address}</p>
-                        <p><strong>رقم البطاقة:</strong> ${userData.idNumber}</p>
-                        <p><strong>تاريخ الإصدار:</strong> ${userData.issueDate}</p>
-                        <p><strong>تاريخ الانتهاء:</strong> ${userData.expiryDate}</p>
-                        <p><strong>صورة البطاقة:</strong> ${userData.idPhoto}</p>
-                        <p><strong>تاريخ الإدخال:</strong> ${userData.createdAt.toDate().toLocaleString()}</p>
-                        <hr>
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><img src="${userData.personalPhoto}" alt="الصورة الشخصية"></td>
+                        <td>${userData.fullName}</td>
+                        <td>${userData.birthDate}</td>
+                        <td>${userData.gender}</td>
+                        <td>${userData.address}</td>
+                        <td>${userData.idNumber}</td>
+                        <td>${userData.issueDate}</td>
+                        <td>${userData.expiryDate}</td>
+                        <td>${userData.createdAt.toDate().toLocaleString()}</td>
                     `;
 
-                    // إضافة الصورة والتفاصيل إلى العنصر
-                    userElement.appendChild(photoElement);
-                    userElement.appendChild(detailsElement);
-
-                    // إضافة العنصر إلى القائمة
-                    userList.appendChild(userElement);
+                    // إضافة الصف إلى الجدول
+                    userList.appendChild(row);
                 }
             });
 
             // إظهار رسالة إذا لم توجد نتائج
             if (!hasResults) {
-                userList.innerHTML = '<p class="no-results">لا توجد نتائج مطابقة للبحث.</p>';
+                noResultsMessage.style.display = 'block';
+            } else {
+                noResultsMessage.style.display = 'none';
             }
         }
 
