@@ -143,6 +143,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
+        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -153,9 +154,29 @@
             measurementId: "G-1XJJGHR2W4"
         };
 
+        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // تكوين Cloudinary
+        const cloudName = 'dgbsnye9w'; // Cloud Name
+        const uploadPreset = 'my_upload_preset'; // Upload Preset
+
+        // دالة لتحميل الصور إلى Cloudinary
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            return data.secure_url; // رابط الصورة بعد التحميل
+        }
+
+        // إرسال النموذج
         document.getElementById('national-id-form').addEventListener('submit', async function(event) {
             event.preventDefault();
 
@@ -170,6 +191,11 @@
             const idPhoto = document.getElementById('id-photo').files[0];
 
             try {
+                // تحميل الصور إلى Cloudinary
+                const personalPhotoURL = await uploadToCloudinary(personalPhoto);
+                const idPhotoURL = await uploadToCloudinary(idPhoto);
+
+                // حفظ البيانات في Firestore
                 await addDoc(collection(db, 'national_id_data'), {
                     fullName: fullName,
                     birthDate: birthDate,
@@ -178,8 +204,8 @@
                     idNumber: idNumber,
                     issueDate: issueDate,
                     expiryDate: expiryDate,
-                    personalPhoto: personalPhoto.name,
-                    idPhoto: idPhoto.name,
+                    personalPhoto: personalPhotoURL, // رابط الصورة الشخصية
+                    idPhoto: idPhotoURL, // رابط صورة البطاقة
                     createdAt: serverTimestamp()
                 });
 
