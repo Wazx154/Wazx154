@@ -9,6 +9,7 @@
         body {
             background-color: #f8f9fa;
             padding: 20px;
+            font-family: 'Tajawal', sans-serif;
         }
         .container {
             max-width: 1200px;
@@ -87,7 +88,7 @@
                 <thead>
                     <tr>
                         <th>الصورة الشخصية</th>
-                        <th>الاسم</th>
+                        <th>الاسم الكامل</th>
                         <th>تاريخ الميلاد</th>
                         <th>الجنس</th>
                         <th>العنوان</th>
@@ -118,6 +119,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
+        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -128,6 +130,7 @@
             measurementId: "G-1XJJGHR2W4"
         };
 
+        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
