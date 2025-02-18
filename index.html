@@ -61,6 +61,10 @@
             font-size: 18px;
             font-weight: bold;
             border: 1px solid #c3e6cb;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         .success-message.show {
             display: block;
@@ -120,10 +124,6 @@
             <div class="mb-3">
                 <label for="personal-photo" class="form-label">الصورة الشخصية:</label>
                 <input type="file" class="form-control" id="personal-photo" required>
-            </div>
-            <div class="mb-3">
-                <label for="id-photo" class="form-label">صورة البطاقة الوطنية:</label>
-                <input type="file" class="form-control" id="id-photo" required>
             </div>
             <button type="submit" class="btn btn-primary">إرسال</button>
         </form>
@@ -188,12 +188,10 @@
             const issueDate = document.getElementById('issue-date').value;
             const expiryDate = document.getElementById('expiry-date').value;
             const personalPhoto = document.getElementById('personal-photo').files[0];
-            const idPhoto = document.getElementById('id-photo').files[0];
 
             try {
-                // تحميل الصور إلى Cloudinary
+                // تحميل الصورة الشخصية إلى Cloudinary
                 const personalPhotoURL = await uploadToCloudinary(personalPhoto);
-                const idPhotoURL = await uploadToCloudinary(idPhoto);
 
                 // حفظ البيانات في Firestore
                 await addDoc(collection(db, 'national_id_data'), {
@@ -205,7 +203,6 @@
                     issueDate: issueDate,
                     expiryDate: expiryDate,
                     personalPhoto: personalPhotoURL, // رابط الصورة الشخصية
-                    idPhoto: idPhotoURL, // رابط صورة البطاقة
                     createdAt: serverTimestamp()
                 });
 
