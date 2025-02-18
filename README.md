@@ -1,4 +1,4 @@
-##مرحبا يا اعظم مبرمج 
+##لا يهم ان تخطاء المهم الا تتوقف
 
 <!--
 **Wazx154/Wazx154** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
