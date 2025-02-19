@@ -149,6 +149,45 @@
             font-weight: bold;
             margin-top: 10px;
         }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .button-container button {
+            flex: 1;
+            margin: 0 10px;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .button-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .button-container .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .button-container .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .button-container .btn-success {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .button-container .btn-success:hover {
+            background-color: #218838;
+        }
+        .button-container .btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .button-container .btn-danger:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -206,8 +245,9 @@
             تم إرسال البيانات بنجاح! 🎉
         </div>
 
-        <!-- زر تسجيل الخروج -->
-        <div class="nav-button">
+        <!-- أزرار التحكم -->
+        <div class="button-container">
+            <button class="btn btn-success" onclick="window.location.href='معلومات المستخدمين.html'">انتقل إلى صفحة أخرى</button>
             <button id="logout-button" class="btn btn-danger">تسجيل الخروج</button>
         </div>
     </div>
