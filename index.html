@@ -206,14 +206,15 @@
             تم إرسال البيانات بنجاح! 🎉
         </div>
 
-        <!-- زر الانتقال إلى صفحة عرض المستخدمين -->
+        <!-- زر تسجيل الخروج -->
         <div class="nav-button">
-            <a href="استقبل المعلومات.html">انتقل إلى قائمة المستخدمين</a>
+            <button id="logout-button" class="btn btn-danger">تسجيل الخروج</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
         // تكوين Firebase
@@ -229,25 +230,26 @@
 
         // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // تكوين Cloudinary
-        const cloudName = 'dgbsnye9w'; // Cloud Name
-        const uploadPreset = 'my_upload_preset'; // Upload Preset
+        // التحقق من حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // إذا لم يكن المستخدم مسجل الدخول، قم بتوجيهه إلى صفحة تسجيل الدخول
+                window.location.href = 'login.html';
+            }
+        });
 
-        // دالة لتحميل الصور إلى Cloudinary
-        async function uploadToCloudinary(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', uploadPreset);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: 'POST',
-                body: formData
+        // تسجيل الخروج
+        const logoutButton = document.getElementById('logout-button');
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'login.html'; // توجيه المستخدم إلى صفحة تسجيل الدخول
+            }).catch((error) => {
+                console.error("حدث خطأ أثناء تسجيل الخروج:", error);
             });
-            const data = await response.json();
-            return data.secure_url; // رابط الصورة بعد التحميل
-        }
+        });
 
         // معاينة الصورة قبل التحميل
         document.getElementById('personal-photo').addEventListener('change', function(event) {
@@ -280,9 +282,6 @@
             const personalPhoto = document.getElementById('personal-photo').files[0];
 
             try {
-                // تحميل الصورة الشخصية إلى Cloudinary
-                const personalPhotoURL = await uploadToCloudinary(personalPhoto);
-
                 // حفظ البيانات في Firestore
                 await addDoc(collection(db, 'national_id_data'), {
                     fullName: fullName,
@@ -292,7 +291,7 @@
                     idNumber: idNumber,
                     issueDate: issueDate,
                     expiryDate: expiryDate,
-                    personalPhoto: personalPhotoURL, // رابط الصورة الشخصية
+                    personalPhoto: personalPhoto.name, // اسم الملف
                     createdAt: serverTimestamp()
                 });
 
