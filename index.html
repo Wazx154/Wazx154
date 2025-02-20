@@ -247,7 +247,7 @@
 
         <!-- أزرار التحكم -->
         <div class="button-container">
-            <button class="btn btn-success" onclick="window.location.href=' استقبل المعلومات.html'">انتقل إلى قائمة المستخدمين</button>
+            <button class="btn btn-success" onclick="window.location.href='استقبل المعلومات.html'">انتقل إلى قائمة المستخدمين</button>
             <button id="logout-button" class="btn btn-danger">تسجيل الخروج</button>
         </div>
     </div>
@@ -291,67 +291,89 @@
             });
         });
 
-        // معاينة الصورة قبل التحميل
+        // تكوين Cloudinary
+        const cloudName = 'dgbsnye9w'; // Cloud Name
+        const uploadPreset = 'my_upload_preset'; // Upload Preset
+        
+        // دالة لتحميل الصور إلى Cloudinary
+        async function uploadToCloudinary(file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', uploadPreset);
+          
+          const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: 'POST',
+            body: formData
+          });
+          const data = await response.json();
+          return data.secure_url; // رابط الصورة بعد التحميل
+        }
+                // معاينة الصورة قبل التحميل
         document.getElementById('personal-photo').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const previewImage = document.getElementById('preview-image');
-                    previewImage.src = e.target.result;
-                    previewImage.style.display = 'block';
-
-                    const uploadConfirmation = document.getElementById('upload-confirmation');
-                    uploadConfirmation.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const previewImage = document.getElementById('preview-image');
+              previewImage.src = e.target.result;
+              previewImage.style.display = 'block';
+              
+              const uploadConfirmation = document.getElementById('upload-confirmation');
+              uploadConfirmation.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+          }
         });
-
+        
+        
         // إرسال النموذج
         document.getElementById('national-id-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const fullName = document.getElementById('full-name').value;
-            const birthDate = document.getElementById('birth-date').value;
-            const gender = document.getElementById('gender').value;
-            const address = document.getElementById('address').value;
-            const idNumber = document.getElementById('id-number').value;
-            const issueDate = document.getElementById('issue-date').value;
-            const expiryDate = document.getElementById('expiry-date').value;
-            const personalPhoto = document.getElementById('personal-photo').files[0];
-
-            try {
-                // حفظ البيانات في Firestore
-                await addDoc(collection(db, 'national_id_data'), {
-                    fullName: fullName,
-                    birthDate: birthDate,
-                    gender: gender,
-                    address: address,
-                    idNumber: idNumber,
-                    issueDate: issueDate,
-                    expiryDate: expiryDate,
-                    personalPhoto: personalPhoto.name, // اسم الملف
-                    createdAt: serverTimestamp()
-                });
-
-                // عرض رسالة النجاح
-                const successMessage = document.getElementById('success-message');
-                successMessage.classList.add('show');
-
-                // إخفاء الرسالة بعد 3 ثواني
-                setTimeout(() => {
-                    successMessage.classList.remove('show');
-                }, 3000);
-
-                // مسح النموذج بعد الإرسال
+          event.preventDefault();
+          
+          const fullName = document.getElementById('full-name').value;
+          const birthDate = document.getElementById('birth-date').value;
+          const gender = document.getElementById('gender').value;
+          const address = document.getElementById('address').value;
+          const idNumber = document.getElementById('id-number').value;
+          const issueDate = document.getElementById('issue-date').value;
+          const expiryDate = document.getElementById('expiry-date').value;
+          const personalPhoto = document.getElementById('personal-photo').files[0];
+          
+          try {
+            // تحميل الصور إلى Cloudinary
+            const personalPhotoURL = await uploadToCloudinary(personalPhoto);
+            
+            // حفظ البيانات في Firestore
+            await addDoc(collection(db, 'national_id_data'), {
+              fullName: fullName,
+              birthDate: birthDate,
+              gender: gender,
+              address: address,
+              idNumber: idNumber,
+              issueDate: issueDate,
+              expiryDate: expiryDate,
+              personalPhoto: personalPhotoURL, // رابط الصورة الشخصية
+              createdAt: serverTimestamp()
+            });
+            
+            // عرض رسالة النجاح
+            const successMessage = document.getElementById('success-message');
+            successMessage.classList.add('show');
+            
+            // إخفاء الرسالة بعد 3 ثواني
+            setTimeout(() => {
+              successMessage.classList.remove('show');
+            }, 3000);
+            
+                            // مسح النموذج بعد الإرسال
                 document.getElementById('national-id-form').reset();
                 document.getElementById('preview-image').style.display = 'none';
                 document.getElementById('upload-confirmation').style.display = 'none';
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        });
-    </script>
-</body>
-</html>
+                }
+                catch (error) {
+                  console.error('Error:', error);
+                }
+                });
+                </script> 
+                </body>
+                </html>
