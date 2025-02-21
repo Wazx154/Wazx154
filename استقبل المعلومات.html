@@ -117,6 +117,10 @@
             width: 3rem;
             height: 3rem;
         }
+        .pagination {
+            justify-content: center;
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
@@ -149,6 +153,13 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <nav>
+            <ul class="pagination" id="pagination-controls">
+                <!-- Pagination items will be generated dynamically -->
+            </ul>
+        </nav>
 
         <!-- رسالة عدم وجود نتائج -->
         <div id="no-results" class="no-results" style="display: none;">
@@ -198,9 +209,14 @@
         const errorMessage = document.getElementById('error-message');
         const loadingSpinner = document.getElementById('loading-spinner');
         const searchInput = document.getElementById('search-input');
+        const paginationControls = document.getElementById('pagination-controls');
+
+        const itemsPerPage = 10;
+        let currentPage = 1;
+        let totalItems = 0;
 
         // دالة لجلب وعرض البيانات
-        async function getUsers(searchQuery = '') {
+        async function getUsers(searchQuery = '', page = 1) {
             try {
                 loadingSpinner.style.display = 'block'; // إظهار مؤشر التحميل
                 errorMessage.style.display = 'none'; // إخفاء رسالة الخطأ
@@ -209,6 +225,7 @@
                 userList.innerHTML = ''; // مسح المحتوى القديم
 
                 let hasResults = false; // لتتبع وجود نتائج
+                totalItems = 0; // إعادة تعيين العدد الإجمالي للعناصر
 
                 querySnapshot.forEach((doc) => {
                     const userData = doc.data();
@@ -220,23 +237,26 @@
 
                     // تصفية البيانات بناءً على نص البحث
                     if (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) {
-                        hasResults = true; // يوجد نتائج
+                        totalItems++;
+                        if (totalItems > (page - 1) * itemsPerPage && totalItems <= page * itemsPerPage) {
+                            hasResults = true; // يوجد نتائج
 
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td><img src="${userData.personalPhoto}" alt="الصورة الشخصية"></td>
-                            <td>${userData.fullName}</td>
-                            <td>${userData.birthDate}</td>
-                            <td>${userData.gender}</td>
-                            <td>${userData.address}</td>
-                            <td>${userData.idNumber}</td>
-                            <td>${userData.issueDate}</td>
-                            <td>${userData.expiryDate}</td>
-                            <td>${userData.createdAt.toDate().toLocaleString()}</td>
-                        `;
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td><img src="${userData.personalPhoto}" alt="الصورة الشخصية"></td>
+                                <td>${userData.fullName}</td>
+                                <td>${userData.birthDate}</td>
+                                <td>${userData.gender}</td>
+                                <td>${userData.address}</td>
+                                <td>${userData.idNumber}</td>
+                                <td>${userData.issueDate}</td>
+                                <td>${userData.expiryDate}</td>
+                                <td>${userData.createdAt.toDate().toLocaleString()}</td>
+                            `;
 
-                        // إضافة الصف إلى الجدول
-                        userList.appendChild(row);
+                            // إضافة الصف إلى الجدول
+                            userList.appendChild(row);
+                        }
                     }
                 });
 
@@ -246,11 +266,38 @@
                 } else {
                     noResultsMessage.style.display = 'none';
                 }
+
+                // توليد عناصر التحكم في الترقيم
+                generatePaginationControls(totalItems, itemsPerPage, page);
             } catch (error) {
                 console.error('حدث خطأ أثناء جلب البيانات:', error);
                 errorMessage.style.display = 'block'; // إظهار رسالة الخطأ
             } finally {
                 loadingSpinner.style.display = 'none'; // إخفاء مؤشر التحميل
+            }
+        }
+
+        // دالة لتوليد عناصر التحكم في الترقيم
+        function generatePaginationControls(totalItems, itemsPerPage, currentPage) {
+            paginationControls.innerHTML = ''; // مسح عناصر التحكم القديمة
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageItem = document.createElement('li');
+                pageItem.classList.add('page-item');
+                if (i === currentPage) {
+                    pageItem.classList.add('active');
+                }
+                const pageLink = document.createElement('a');
+                pageLink.classList.add('page-link');
+                pageLink.href = '#';
+                pageLink.textContent = i;
+                pageLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    getUsers(searchInput.value, i);
+                });
+                pageItem.appendChild(pageLink);
+                paginationControls.appendChild(pageItem);
             }
         }
 
@@ -260,7 +307,7 @@
         // إضافة حدث البحث
         searchInput.addEventListener('input', (event) => {
             const searchQuery = event.target.value.trim();
-            getUsers(searchQuery);
+            getUsers(searchQuery, 1);
         });
     </script>
 </body>
