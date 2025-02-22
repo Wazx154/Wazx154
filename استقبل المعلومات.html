@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض معلومات البطاقة الوطنية</title>
+    <title>عرض معلومات البطاقة الوطنية المغربية</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #f0f4f8;
-            padding: 20px;
+            background-color: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
         h1 {
             text-align: center;
@@ -27,22 +23,32 @@
             font-weight: 700;
             font-size: 2.5rem;
         }
-        .search-box {
-            text-align: center;
+        .search-filter-container {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 30px;
         }
-        .search-box input {
-            max-width: 500px;
-            margin: 0 auto;
+        .search-box, .filter-box {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .search-box input, .filter-box select {
+            width: 100%;
             padding: 12px 20px;
             border-radius: 25px;
             border: 2px solid #007bff;
             font-size: 16px;
             transition: all 0.3s ease;
         }
-        .search-box input:focus {
+        .search-box input:focus, .filter-box select:focus {
             border-color: #0056b3;
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+        }
+        .count-box {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: #555;
         }
         .table-responsive {
             margin-top: 30px;
@@ -71,7 +77,7 @@
         .table img:hover {
             transform: scale(1.1);
         }
-        .no-results {
+        .no-results, .error-message {
             text-align: center;
             color: #777;
             font-size: 20px;
@@ -80,6 +86,10 @@
             background-color: #f8f9fa;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .error-message {
+            color: #dc3545;
+            display: none;
         }
         .nav-button {
             text-align: center;
@@ -102,17 +112,6 @@
             margin-top: 30px;
             display: none;
         }
-        .error-message {
-            text-align: center;
-            color: #dc3545;
-            font-size: 20px;
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
         .spinner-border {
             width: 3rem;
             height: 3rem;
@@ -127,9 +126,23 @@
     <div class="container">
         <h1>عرض معلومات البطاقة الوطنية المغربية</h1>
 
-        <!-- حقل البحث -->
-        <div class="search-box">
-            <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
+        <!-- حقل البحث والفلترة -->
+        <div class="search-filter-container">
+            <div class="search-box">
+                <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
+            </div>
+            <div class="filter-box">
+                <select id="filter-select" class="form-control">
+                    <option value="">جميع الجنس</option>
+                    <option value="male">ذكر</option>
+                    <option value="female">أنثى</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- عدد الأشخاص -->
+        <div class="count-box">
+            <span id="count-display">عدد الأشخاص: 0</span>
         </div>
 
         <!-- جدول عرض البيانات -->
@@ -209,6 +222,8 @@
         const errorMessage = document.getElementById('error-message');
         const loadingSpinner = document.getElementById('loading-spinner');
         const searchInput = document.getElementById('search-input');
+        const filterSelect = document.getElementById('filter-select');
+        const countDisplay = document.getElementById('count-display');
         const paginationControls = document.getElementById('pagination-controls');
 
         const itemsPerPage = 10;
@@ -216,7 +231,7 @@
         let totalItems = 0;
 
         // دالة لجلب وعرض البيانات
-        async function getUsers(searchQuery = '', page = 1) {
+        async function getUsers(searchQuery = '', filterQuery = '', page = 1) {
             try {
                 loadingSpinner.style.display = 'block'; // إظهار مؤشر التحميل
                 errorMessage.style.display = 'none'; // إخفاء رسالة الخطأ
@@ -233,10 +248,12 @@
                     // تحويل النص إلى أحرف صغيرة للبحث غير الحساس لحالة الأحرف
                     const fullName = (userData.fullName || '').toLowerCase();
                     const idNumber = (userData.idNumber || '').toLowerCase();
+                    const gender = (userData.gender || '').toLowerCase();
                     const searchTerm = searchQuery.toLowerCase();
+                    const filterTerm = filterQuery.toLowerCase();
 
-                    // تصفية البيانات بناءً على نص البحث
-                    if (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) {
+                    // تصفية البيانات بناءً على نص البحث والتصنيف
+                    if ((fullName.includes(searchTerm) || idNumber.includes(searchTerm)) && (filterTerm === '' || gender === filterTerm)) {
                         totalItems++;
                         if (totalItems > (page - 1) * itemsPerPage && totalItems <= page * itemsPerPage) {
                             hasResults = true; // يوجد نتائج
@@ -259,6 +276,9 @@
                         }
                     }
                 });
+
+                // تحديث عرض عدد الأشخاص
+                countDisplay.textContent = `عدد الأشخاص: ${totalItems}`;
 
                 // إظهار رسالة إذا لم توجد نتائج
                 if (!hasResults) {
@@ -294,7 +314,7 @@
                 pageLink.textContent = i;
                 pageLink.addEventListener('click', (event) => {
                     event.preventDefault();
-                    getUsers(searchInput.value, i);
+                    getUsers(searchInput.value, filterSelect.value, i);
                 });
                 pageItem.appendChild(pageLink);
                 paginationControls.appendChild(pageItem);
@@ -307,7 +327,13 @@
         // إضافة حدث البحث
         searchInput.addEventListener('input', (event) => {
             const searchQuery = event.target.value.trim();
-            getUsers(searchQuery, 1);
+            getUsers(searchQuery, filterSelect.value, 1);
+        });
+
+        // إضافة حدث الفلترة
+        filterSelect.addEventListener('change', (event) => {
+            const filterQuery = event.target.value;
+            getUsers(searchInput.value, filterQuery, 1);
         });
     </script>
 </body>
