@@ -4,130 +4,221 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عرض معلومات البطاقة الوطنية المغربية</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
-            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
+
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 1300px;
+            margin: 40px auto;
             padding: 20px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            animation: fadeInUp 0.5s ease-in-out;
         }
+
         h1 {
             text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
+            color: #1a3c6d;
             font-weight: 700;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
         }
+
         .search-filter-container {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
+
         .search-box, .filter-box {
             flex: 1;
-            margin: 0 10px;
+            min-width: 250px;
         }
+
         .search-box input, .filter-box select {
             width: 100%;
-            padding: 12px 20px;
-            border-radius: 25px;
-            border: 2px solid #007bff;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: none;
+            background: #f8f9fa;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
         }
+
         .search-box input:focus, .filter-box select:focus {
-            border-color: #0056b3;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+            outline: none;
+            box-shadow: 0 0 15px rgba(26, 60, 109, 0.2);
+            background: #fff;
+            transform: scale(1.02);
         }
+
         .count-box {
             text-align: center;
             margin-bottom: 30px;
-            font-size: 18px;
-            color: #555;
+            font-size: 1.2rem;
+            color: #495057;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease;
         }
+
         .table-responsive {
-            margin-top: 30px;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
+
         .table thead {
-            background-color: #007bff;
+            background: linear-gradient(90deg, #1a3c6d, #2e5b9f);
             color: #fff;
-            font-size: 18px;
+            font-weight: 600;
         }
+
         .table th, .table td {
+            padding: 20px;
             text-align: center;
             vertical-align: middle;
-            padding: 15px;
+            transition: background 0.3s ease;
         }
+
+        .table tbody tr:hover {
+            background: #f1f5f9;
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+
         .table img {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #007bff;
-            transition: transform 0.3s ease;
+            border: 4px solid #1a3c6d;
+            transition: all 0.3s ease;
         }
+
         .table img:hover {
-            transform: scale(1.1);
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
+
         .no-results, .error-message {
             text-align: center;
-            color: #777;
-            font-size: 20px;
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f9fa;
+            font-size: 1.3rem;
+            padding: 25px;
+            margin: 30px 0;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #f8f9fa;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease;
         }
+
         .error-message {
             color: #dc3545;
+            background: #f8d7da;
             display: none;
         }
-        .nav-button {
-            text-align: center;
-            margin-top: 30px;
-        }
+
         .nav-button a {
+            display: inline-block;
             text-decoration: none;
             color: #fff;
-            background-color: #007bff;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 18px;
-            transition: background-color 0.3s ease;
+            background: linear-gradient(90deg, #1a3c6d, #2e5b9f);
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
+
         .nav-button a:hover {
-            background-color: #0056b3;
+            background: linear-gradient(90deg, #2e5b9f, #1a3c6d);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
+
         .loading-spinner {
             text-align: center;
-            margin-top: 30px;
+            margin: 40px 0;
             display: none;
         }
+
         .spinner-border {
-            width: 3rem;
-            height: 3rem;
+            width: 4rem;
+            height: 4rem;
+            border-width: 0.4em;
+            color: #1a3c6d;
         }
+
         .pagination {
             justify-content: center;
-            margin-top: 30px;
+            margin-top: 40px;
+        }
+
+        .pagination .page-item .page-link {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            color: #1a3c6d;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: #1a3c6d;
+            color: #fff;
+            border-color: #1a3c6d;
+        }
+
+        .pagination .page-link:hover {
+            background: #2e5b9f;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .table th, .table td { padding: 15px; }
+            .table img { width: 70px; height: 70px; }
+            .search-filter-container { flex-direction: column; gap: 15px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>عرض معلومات البطاقة الوطنية المغربية</h1>
+        <h1 class="animate__animated animate__fadeIn">عرض معلومات البطاقة الوطنية المغربية</h1>
 
-        <!-- حقل البحث والفلترة -->
-        <div class="search-filter-container">
+        <div class="search-filter-container animate__animated animate__fadeIn">
             <div class="search-box">
                 <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
             </div>
@@ -140,14 +231,10 @@
             </div>
         </div>
 
-        <!-- عدد الأشخاص -->
-        <div class="count-box">
-            <span id="count-display">عدد الأشخاص: 0</span>
-        </div>
+        <div class="count-box" id="count-display">عدد الأشخاص: 0</div>
 
-        <!-- جدول عرض البيانات -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
+        <div class="table-responsive animate__animated animate__fadeIn">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>الصورة الشخصية</th>
@@ -161,47 +248,39 @@
                         <th>تاريخ الإدخال</th>
                     </tr>
                 </thead>
-                <tbody id="user-list">
-                    <!-- البيانات ستظهر هنا -->
-                </tbody>
+                <tbody id="user-list"></tbody>
             </table>
         </div>
 
-        <!-- Pagination Controls -->
         <nav>
-            <ul class="pagination" id="pagination-controls">
-                <!-- Pagination items will be generated dynamically -->
-            </ul>
+            <ul class="pagination" id="pagination-controls"></ul>
         </nav>
 
-        <!-- رسالة عدم وجود نتائج -->
         <div id="no-results" class="no-results" style="display: none;">
             لا توجد نتائج مطابقة للبحث.
         </div>
 
-        <!-- رسالة خطأ -->
         <div id="error-message" class="error-message" style="display: none;">
-            حدث خطأ أثناء جلب البيانات. يرجى المحاولة مرة أخرى لاحقًا.
+            حدث خطأ أثناء جلب البيانات. حاول مرة أخرى لاحقًا.
         </div>
 
-        <!-- مؤشر التحميل -->
         <div id="loading-spinner" class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">جارٍ التحميل...</span>
             </div>
         </div>
 
-        <!-- زر الانتقال إلى صفحة إدخال البيانات -->
-        <div class="nav-button">
+        <div class="nav-button animate__animated animate__fadeIn">
             <a href="index.html">انتقل إلى صفحة إدخال البيانات</a>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+        // استيراد مكتبات Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // تكوين Firebase
+// تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -228,113 +307,135 @@
 
         const itemsPerPage = 10;
         let currentPage = 1;
-        let totalItems = 0;
 
-        // دالة لجلب وعرض البيانات
-        async function getUsers(searchQuery = '', filterQuery = '', page = 1) {
+        // جلب البيانات من Firestore وعرضها
+        async function fetchUsers(searchQuery = '', filterQuery = '', page = 1) {
             try {
-                loadingSpinner.style.display = 'block'; // إظهار مؤشر التحميل
-                errorMessage.style.display = 'none'; // إخفاء رسالة الخطأ
+                loadingSpinner.style.display = 'block';
+                errorMessage.style.display = 'none';
+                noResultsMessage.style.display = 'none';
+                userList.innerHTML = '';
 
+                // جلب جميع المستندات من المجموعة
                 const querySnapshot = await getDocs(collection(db, 'national_id_data'));
-                userList.innerHTML = ''; // مسح المحتوى القديم
+                const users = [];
 
-                let hasResults = false; // لتتبع وجود نتائج
-                totalItems = 0; // إعادة تعيين العدد الإجمالي للعناصر
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    users.push({
+                        personalPhoto: data.personalPhoto || 'https://via.placeholder.com/90', // صورة افتراضية إذا لم تكن موجودة
+                        fullName: data.fullName || 'غير محدد',
+                        birthDate: data.birthDate || 'غير محدد',
+                        gender: data.gender || 'غير محدد',
+                        address: data.address || 'غير محدد',
+                        idNumber: data.idNumber || 'غير محدد',
+                        issueDate: data.issueDate || 'غير محدد',
+                        expiryDate: data.expiryDate || 'غير محدد',
+                        createdAt: data.createdAt?.toDate().toLocaleString('ar-MA') || 'غير محدد'
+                    });
+                });
 
-                querySnapshot.forEach((doc) => {
-                    const userData = doc.data();
-
-                    // تحويل النص إلى أحرف صغيرة للبحث غير الحساس لحالة الأحرف
-                    const fullName = (userData.fullName || '').toLowerCase();
-                    const idNumber = (userData.idNumber || '').toLowerCase();
-                    const gender = (userData.gender || '').toLowerCase();
+                // تصفية البيانات بناءً على البحث والفلتر
+                const filteredUsers = users.filter(user => {
+                    const fullName = user.fullName.toLowerCase();
+                    const idNumber = user.idNumber.toLowerCase();
+                    const gender = user.gender.toLowerCase();
                     const searchTerm = searchQuery.toLowerCase();
                     const filterTerm = filterQuery.toLowerCase();
 
-                    // تصفية البيانات بناءً على نص البحث والتصنيف
-                    if ((fullName.includes(searchTerm) || idNumber.includes(searchTerm)) && (filterTerm === '' || gender === filterTerm)) {
-                        totalItems++;
-                        if (totalItems > (page - 1) * itemsPerPage && totalItems <= page * itemsPerPage) {
-                            hasResults = true; // يوجد نتائج
-
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td><img src="${userData.personalPhoto}" alt="الصورة الشخصية"></td>
-                                <td>${userData.fullName}</td>
-                                <td>${userData.birthDate}</td>
-                                <td>${userData.gender}</td>
-                                <td>${userData.address}</td>
-                                <td>${userData.idNumber}</td>
-                                <td>${userData.issueDate}</td>
-                                <td>${userData.expiryDate}</td>
-                                <td>${userData.createdAt.toDate().toLocaleString()}</td>
-                            `;
-
-                            // إضافة الصف إلى الجدول
-                            userList.appendChild(row);
-                        }
-                    }
+                    return (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) &&
+                           (filterTerm === '' || gender === filterTerm);
                 });
 
-                // تحديث عرض عدد الأشخاص
+                // تحديث عدد الأشخاص
+                const totalItems = filteredUsers.length;
                 countDisplay.textContent = `عدد الأشخاص: ${totalItems}`;
 
-                // إظهار رسالة إذا لم توجد نتائج
-                if (!hasResults) {
+                // تقسيم الصفحات
+                const startIdx = (page - 1) * itemsPerPage;
+                const endIdx = startIdx + itemsPerPage;
+                const paginatedUsers = filteredUsers.slice(startIdx, endIdx);
+
+                if (paginatedUsers.length === 0) {
                     noResultsMessage.style.display = 'block';
                 } else {
-                    noResultsMessage.style.display = 'none';
+                    paginatedUsers.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.classList.add('animate__animated', 'animate__fadeInUp');
+                        row.innerHTML = `
+                            <td><img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
+                            <td>${user.fullName}</td>
+                            <td>${user.birthDate}</td>
+                            <td>${user.gender}</td>
+                            <td>${user.address}</td>
+                            <td>${user.idNumber}</td>
+                            <td>${user.issueDate}</td>
+                            <td>${user.expiryDate}</td>
+                            <td>${user.createdAt}</td>
+                        `;
+                        userList.appendChild(row);
+                    });
                 }
 
-                // توليد عناصر التحكم في الترقيم
-                generatePaginationControls(totalItems, itemsPerPage, page);
+                // إنشاء الصفحات
+                generatePagination(totalItems, page);
             } catch (error) {
-                console.error('حدث خطأ أثناء جلب البيانات:', error);
-                errorMessage.style.display = 'block'; // إظهار رسالة الخطأ
+                console.error('خطأ أثناء جلب البيانات:', error);
+                errorMessage.style.display = 'block';
             } finally {
-                loadingSpinner.style.display = 'none'; // إخفاء مؤشر التحميل
+                loadingSpinner.style.display = 'none';
             }
         }
 
-        // دالة لتوليد عناصر التحكم في الترقيم
-        function generatePaginationControls(totalItems, itemsPerPage, currentPage) {
-            paginationControls.innerHTML = ''; // مسح عناصر التحكم القديمة
+        // إنشاء أزرار التصفح
+        function generatePagination(totalItems, currentPage) {
+            paginationControls.innerHTML = '';
             const totalPages = Math.ceil(totalItems / itemsPerPage);
 
             for (let i = 1; i <= totalPages; i++) {
                 const pageItem = document.createElement('li');
                 pageItem.classList.add('page-item');
-                if (i === currentPage) {
-                    pageItem.classList.add('active');
-                }
+                if (i === currentPage) pageItem.classList.add('active');
+
                 const pageLink = document.createElement('a');
                 pageLink.classList.add('page-link');
                 pageLink.href = '#';
                 pageLink.textContent = i;
-                pageLink.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    getUsers(searchInput.value, filterSelect.value, i);
+                pageLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    fetchUsers(searchInput.value, filterSelect.value, i);
                 });
+
                 pageItem.appendChild(pageLink);
                 paginationControls.appendChild(pageItem);
             }
         }
 
-        // استدعاء الدالة عند تحميل الصفحة
-        getUsers();
+        // تحميل البيانات عند فتح الصفحة
+        fetchUsers();
 
-        // إضافة حدث البحث
-        searchInput.addEventListener('input', (event) => {
-            const searchQuery = event.target.value.trim();
-            getUsers(searchQuery, filterSelect.value, 1);
+        // إضافة مستمع للبحث مع تأخير
+        searchInput.addEventListener('input', debounce(() => {
+            fetchUsers(searchInput.value, filterSelect.value, 1);
+        }, 300));
+
+        // إضافة مستمع لتغيير الفلتر
+        filterSelect.addEventListener('change', () => {
+            fetchUsers(searchInput.value, filterSelect.value, 1);
         });
 
-        // إضافة حدث الفلترة
-        filterSelect.addEventListener('change', (event) => {
-            const filterQuery = event.target.value;
-            getUsers(searchInput.value, filterQuery, 1);
-        });
+        // دالة التأخير (debounce)
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
     </script>
 </body>
 </html>
