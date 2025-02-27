@@ -6,88 +6,139 @@
     <title>تسجيل الدخول</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* تحسين التصميم العام */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #1a1a1a, #333333);
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
             font-family: 'Tajawal', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            color: #ffffff;
+            overflow: hidden;
         }
+
         .container {
-            max-width: 400px;
-            background: rgba(44, 44, 44, 0.9);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
             text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 0.6s ease-in-out;
         }
+
         h1 {
-            margin-bottom: 30px;
-            color: #ffffff;
-            font-size: 28px;
+            color: #1e3a8a;
+            font-size: 2.2rem;
             font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.05);
         }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
         .form-control {
-            margin-bottom: 20px;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 16px;
-            background: rgba(60, 60, 60, 0.8);
-            border: 1px solid rgba(85, 85, 85, 0.5);
-            color: #ffffff;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            width: 100%;
+            padding: 14px 45px 14px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+            font-size: 1.1rem;
+            color: #374151;
+            transition: all 0.3s ease;
         }
+
         .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            border-color: #3b82f6;
+            background: #fff;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
             outline: none;
         }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 1.2rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: #3b82f6;
+        }
+
         .btn-primary {
             width: 100%;
-            border-radius: 10px;
-            font-size: 18px;
-            padding: 12px;
-            background-color: #007bff;
+            padding: 14px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #3b82f6, #1e3a8a);
             border: none;
-            transition: background-color 0.3s, transform 0.2s;
-            color: #ffffff;
-            font-weight: 700;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
+
         .btn-primary:hover {
-            background-color: #0056b3;
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
             transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.3);
         }
-        .btn-primary:active {
-            transform: translateY(0);
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
-        .spinner-border {
-            display: none;
-            margin-top: 20px;
-            width: 2rem;
-            height: 2rem;
-            color: #007bff;
-        }
+
         .nav-link {
-            text-align: center;
+            display: block;
             margin-top: 20px;
-            font-size: 14px;
-            color: #007bff;
-            cursor: pointer;
+            font-size: 1rem;
+            color: #3b82f6;
             text-decoration: none;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
         }
+
         .nav-link:hover {
-            color: #0056b3;
+            color: #1e3a8a;
         }
-        /* تحسين ميزة التحميل */
+
         .loading-overlay {
             display: none;
             position: fixed;
@@ -95,49 +146,60 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
         }
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.4em;
+            color: #3b82f6;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 576px) {
+            .container { padding: 25px; max-width: 90%; }
+            h1 { font-size: 1.8rem; }
+            .form-control { font-size: 1rem; padding: 12px 40px 12px 15px; }
+            .btn-primary { font-size: 1rem; padding: 12px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>تسجيل الدخول</h1>
-        <form id="login-form">
+        <h1 class="animate__animated animate__fadeIn">تسجيل الدخول</h1>
+        <form id="login-form" class="animate__animated animate__fadeInUp">
             <div class="form-group">
+                <i class="fas fa-envelope input-icon"></i>
                 <input type="email" id="login-email" class="form-control" placeholder="البريد الإلكتروني" required>
             </div>
             <div class="form-group">
+                <i class="fas fa-lock input-icon"></i>
                 <input type="password" id="login-password" class="form-control" placeholder="كلمة المرور" required>
+                <i class="fas fa-eye toggle-password" id="toggle-password"></i>
             </div>
-            <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">تحميل...</span>
-    <!-- ميزة التحميل -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-spinner"></div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">جارٍ التحميل...</span>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // تكوين Firebase (يجب استبدالها بمتغيرات البيئة في الإنتاج)
+        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -152,33 +214,48 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // تسجيل الدخول
+        // التعامل مع إظهار/إخفاء كلمة المرور
+        const passwordInput = document.getElementById('login-password');
+        const togglePassword = document.getElementById('toggle-password');
+
+        togglePassword.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePassword.classList.remove('fa-eye');
+                togglePassword.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                togglePassword.classList.remove('fa-eye-slash');
+                togglePassword.classList.add('fa-eye');
+            }
+        });
+
+        // التعامل مع تسجيل الدخول
         const loginForm = document.getElementById('login-form');
-        const spinner = document.querySelector('.spinner-border');
-        const loginButton = document.querySelector('.btn-primary');
+        const loginButton = loginForm.querySelector('.btn-primary');
         const loadingOverlay = document.getElementById('loading-overlay');
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
-            // عرض ميزة التحميل
             loadingOverlay.style.display = 'flex';
             loginButton.disabled = true;
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = 'index.html'; // توجيه المستخدم إلى لوحة التحكم
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'index.html';
             } catch (error) {
                 Swal.fire({
                     title: 'خطأ',
                     text: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
                     icon: 'error',
-                    confirmButtonText: 'موافق'
+                    confirmButtonText: 'موافق',
+                    confirmButtonColor: '#3b82f6'
                 });
             } finally {
-                // إخفاء ميزة التحميل
                 loadingOverlay.style.display = 'none';
                 loginButton.disabled = false;
             }
