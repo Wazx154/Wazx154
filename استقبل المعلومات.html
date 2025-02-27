@@ -23,10 +23,10 @@
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             background: #ffffff;
-            padding: 40px;
+            padding: 30px;
             border-radius: 25px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
             animation: fadeInUp 0.8s ease-in-out;
@@ -84,9 +84,16 @@
 
         .table-responsive {
             border-radius: 15px;
-            overflow: hidden;
+            overflow-x: auto;
             background: #fff;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .table {
+            width: 100%;
+            min-width: 1200px;
+            margin-bottom: 0;
+            cursor: pointer;
         }
 
         .table thead {
@@ -96,19 +103,23 @@
         }
 
         .table th, .table td {
-            padding: 18px;
+            padding: 12px 15px;
             text-align: center;
             vertical-align: middle;
             transition: background 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
         }
 
         .table tbody tr:hover {
-            background: #f1f5f9;
+            background: #e6f3f5;
         }
 
         .table img {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #00695c;
@@ -177,6 +188,72 @@
             color: #fff;
         }
 
+        /* أنماط النافذة المنبثقة */
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(90deg, #00695c, #4db6ac);
+            color: #fff;
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: right;
+        }
+
+        .modal-body img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid #00695c;
+            display: block;
+            margin: 0 auto 20px;
+            object-fit: cover;
+        }
+
+        .modal-body .detail-item {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            color: #374151;
+        }
+
+        .modal-body .detail-item strong {
+            color: #00695c;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 15px 20px;
+            justify-content: center;
+        }
+
+        .modal-footer .btn {
+            background: #00695c;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-footer .btn:hover {
+            background: #004d40;
+            box-shadow: 0 5px 15px rgba(0, 77, 64, 0.3);
+        }
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -184,10 +261,13 @@
 
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
-            .table th, .table td { padding: 12px; }
-            .table img { width: 70px; height: 70px; }
+            .container { padding: 20px; }
+            .table th, .table td { padding: 10px; font-size: 0.9rem; max-width: 100px; }
+            .table img { width: 60px; height: 60px; }
             .search-filter-container { flex-direction: column; gap: 15px; }
             .count-box { font-size: 1rem; }
+            .modal-body img { width: 120px; height: 120px; }
+            .modal-body .detail-item { font-size: 1rem; }
         }
     </style>
 </head>
@@ -249,6 +329,25 @@
         </div>
     </div>
 
+    <!-- نافذة التفاصيل المنبثقة -->
+    <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userDetailsModalLabel">تفاصيل المستخدم</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                </div>
+                <div class="modal-body" id="modalBodyContent">
+                    <!-- المحتوى سيتم إضافته ديناميكيًا -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -277,6 +376,7 @@
         const filterSelect = document.getElementById('filter-select');
         const countDisplay = document.getElementById('count-display');
         const paginationControls = document.getElementById('pagination-controls');
+        const modalBodyContent = document.getElementById('modalBodyContent');
 
         const itemsPerPage = 10;
         let currentPage = 1;
@@ -293,6 +393,31 @@
             if (!dateString) return 'غير محدد';
             const date = new Date(dateString);
             return isNaN(date) ? 'غير محدد' : date.toLocaleDateString('ar-MA');
+        }
+
+        // تحويل الجنس إلى العربية
+        function formatGender(gender) {
+            if (gender === 'male') return 'ذكر';
+            if (gender === 'female') return 'أنثى';
+            return sanitizeInput(gender) || 'غير محدد';
+        }
+
+        // عرض تفاصيل المستخدم في النافذة المنبثقة
+        function showUserDetails(user) {
+            modalBodyContent.innerHTML = `
+                <img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
+                <div class="detail-item"><strong>الاسم الكامل:</strong> ${user.fullName}</div>
+                <div class="detail-item"><strong>تاريخ الميلاد:</strong> ${user.birthDate}</div>
+                <div class="detail-item"><strong>الجنس:</strong> ${formatGender(user.gender)}</div>
+                <div class="detail-item"><strong>العنوان:</strong> ${user.address}</div>
+                <div class="detail-item"><strong>رقم البطاقة:</strong> ${user.idNumber}</div>
+                <div class="detail-item"><strong>رقم الهاتف:</strong> ${user.phoneNumber}</div>
+                <div class="detail-item"><strong>تاريخ الإصدار:</strong> ${user.issueDate}</div>
+                <div class="detail-item"><strong>تاريخ الانتهاء:</strong> ${user.expiryDate}</div>
+                <div class="detail-item"><strong>تاريخ الإدخال:</strong> ${user.createdAt}</div>
+            `;
+            const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
+            modal.show();
         }
 
         // جلب البيانات من Firestore
@@ -312,7 +437,7 @@
                         personalPhoto: data.personalPhoto || 'https://via.placeholder.com/90',
                         fullName: sanitizeInput(data.fullName || 'غير محدد'),
                         birthDate: formatDate(data.birthDate),
-                        gender: sanitizeInput(data.gender || 'غير محدد'),
+                        gender: data.gender || 'غير محدد', // نتركها كما هي للتحويل لاحقًا
                         address: sanitizeInput(data.address || 'غير محدد'),
                         idNumber: sanitizeInput(data.idNumber || 'غير محدد'),
                         phoneNumber: sanitizeInput(data.phoneNumber || 'غير محدد'),
@@ -351,7 +476,7 @@
                             <td><img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
                             <td>${user.fullName}</td>
                             <td>${user.birthDate}</td>
-                            <td>${user.gender}</td>
+                            <td>${formatGender(user.gender)}</td> <!-- تحويل الجنس إلى العربية -->
                             <td>${user.address}</td>
                             <td>${user.idNumber}</td>
                             <td>${user.phoneNumber}</td>
@@ -359,6 +484,7 @@
                             <td>${user.expiryDate}</td>
                             <td>${user.createdAt}</td>
                         `;
+                        row.addEventListener('click', () => showUserDetails(user));
                         userList.appendChild(row);
                     });
                 }
