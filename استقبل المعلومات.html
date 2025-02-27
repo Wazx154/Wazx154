@@ -15,29 +15,30 @@
         }
 
         body {
-            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
             font-family: 'Cairo', sans-serif;
             min-height: 100vh;
+            padding: 40px 20px;
             overflow-x: hidden;
         }
 
         .container {
             max-width: 1300px;
-            margin: 40px auto;
-            padding: 20px;
+            margin: 0 auto;
             background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            animation: fadeInUp 0.5s ease-in-out;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease-in-out;
         }
 
         h1 {
             text-align: center;
-            color: #1a3c6d;
+            color: #00695c;
             font-weight: 700;
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             margin-bottom: 40px;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.05);
         }
 
         .search-filter-container {
@@ -55,31 +56,30 @@
 
         .search-box input, .filter-box select {
             width: 100%;
-            padding: 15px 25px;
-            border-radius: 50px;
-            border: none;
-            background: #f8f9fa;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+            padding: 12px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f9fafb;
             font-size: 1.1rem;
-            transition: all 0.4s ease;
+            transition: all 0.3s ease;
         }
 
         .search-box input:focus, .filter-box select:focus {
-            outline: none;
-            box-shadow: 0 0 15px rgba(26, 60, 109, 0.2);
+            border-color: #00695c;
             background: #fff;
-            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(0, 105, 92, 0.2);
+            outline: none;
         }
 
         .count-box {
             text-align: center;
             margin-bottom: 30px;
             font-size: 1.2rem;
-            color: #495057;
-            background: #e9ecef;
-            padding: 10px;
+            color: #374151;
+            background: #e6f3f5;
+            padding: 12px;
             border-radius: 10px;
-            animation: fadeIn 0.5s ease;
+            border: 2px solid #4db6ac;
         }
 
         .table-responsive {
@@ -90,13 +90,13 @@
         }
 
         .table thead {
-            background: linear-gradient(90deg, #1a3c6d, #2e5b9f);
+            background: linear-gradient(90deg, #00695c, #4db6ac);
             color: #fff;
             font-weight: 600;
         }
 
         .table th, .table td {
-            padding: 20px;
+            padding: 18px;
             text-align: center;
             vertical-align: middle;
             transition: background 0.3s ease;
@@ -104,8 +104,6 @@
 
         .table tbody tr:hover {
             background: #f1f5f9;
-            transform: scale(1.01);
-            transition: all 0.3s ease;
         }
 
         .table img {
@@ -113,13 +111,12 @@
             height: 90px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #1a3c6d;
-            transition: all 0.3s ease;
+            border: 3px solid #00695c;
+            transition: transform 0.3s ease;
         }
 
         .table img:hover {
-            transform: scale(1.15) rotate(5deg);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: scale(1.1);
         }
 
         .no-results, .error-message {
@@ -127,35 +124,15 @@
             font-size: 1.3rem;
             padding: 25px;
             margin: 30px 0;
-            border-radius: 15px;
+            border-radius: 12px;
             background: #f8f9fa;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            animation: fadeIn 0.5s ease;
         }
 
         .error-message {
-            color: #dc3545;
-            background: #f8d7da;
+            color: #d32f2f;
+            background: #fee2e2;
             display: none;
-        }
-
-        .nav-button a {
-            display: inline-block;
-            text-decoration: none;
-            color: #fff;
-            background: linear-gradient(90deg, #1a3c6d, #2e5b9f);
-            padding: 15px 35px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            transition: all 0.4s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-button a:hover {
-            background: linear-gradient(90deg, #2e5b9f, #1a3c6d);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .loading-spinner {
@@ -165,10 +142,10 @@
         }
 
         .spinner-border {
-            width: 4rem;
-            height: 4rem;
-            border-width: 0.4em;
-            color: #1a3c6d;
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+            color: #00695c;
         }
 
         .pagination {
@@ -184,21 +161,20 @@
             align-items: center;
             justify-content: center;
             margin: 0 5px;
-            color: #1a3c6d;
+            color: #00695c;
             font-weight: 600;
             transition: all 0.3s ease;
         }
 
         .pagination .page-item.active .page-link {
-            background: #1a3c6d;
+            background: #00695c;
             color: #fff;
-            border-color: #1a3c6d;
+            border-color: #00695c;
         }
 
         .pagination .page-link:hover {
-            background: #2e5b9f;
+            background: #004d40;
             color: #fff;
-            transform: scale(1.1);
         }
 
         @keyframes fadeInUp {
@@ -208,9 +184,10 @@
 
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
-            .table th, .table td { padding: 15px; }
+            .table th, .table td { padding: 12px; }
             .table img { width: 70px; height: 70px; }
             .search-filter-container { flex-direction: column; gap: 15px; }
+            .count-box { font-size: 1rem; }
         }
     </style>
 </head>
@@ -243,6 +220,7 @@
                         <th>الجنس</th>
                         <th>العنوان</th>
                         <th>رقم البطاقة</th>
+                        <th>رقم الهاتف</th>
                         <th>تاريخ الإصدار</th>
                         <th>تاريخ الانتهاء</th>
                         <th>تاريخ الإدخال</th>
@@ -269,18 +247,13 @@
                 <span class="visually-hidden">جارٍ التحميل...</span>
             </div>
         </div>
-
-        <div class="nav-button animate__animated animate__fadeIn">
-            <a href="index.html">انتقل إلى صفحة إدخال البيانات</a>
-        </div>
     </div>
 
     <script type="module">
-        // استيراد مكتبات Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// تكوين Firebase
+        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -308,7 +281,21 @@
         const itemsPerPage = 10;
         let currentPage = 1;
 
-        // جلب البيانات من Firestore وعرضها
+        // تنظيف المدخلات لمنع XSS
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+
+        // تنسيق التاريخ
+        function formatDate(dateString) {
+            if (!dateString) return 'غير محدد';
+            const date = new Date(dateString);
+            return isNaN(date) ? 'غير محدد' : date.toLocaleDateString('ar-MA');
+        }
+
+        // جلب البيانات من Firestore
         async function fetchUsers(searchQuery = '', filterQuery = '', page = 1) {
             try {
                 loadingSpinner.style.display = 'block';
@@ -316,42 +303,39 @@
                 noResultsMessage.style.display = 'none';
                 userList.innerHTML = '';
 
-                // جلب جميع المستندات من المجموعة
                 const querySnapshot = await getDocs(collection(db, 'national_id_data'));
                 const users = [];
 
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     users.push({
-                        personalPhoto: data.personalPhoto || 'https://via.placeholder.com/90', // صورة افتراضية إذا لم تكن موجودة
-                        fullName: data.fullName || 'غير محدد',
-                        birthDate: data.birthDate || 'غير محدد',
-                        gender: data.gender || 'غير محدد',
-                        address: data.address || 'غير محدد',
-                        idNumber: data.idNumber || 'غير محدد',
-                        issueDate: data.issueDate || 'غير محدد',
-                        expiryDate: data.expiryDate || 'غير محدد',
+                        personalPhoto: data.personalPhoto || 'https://via.placeholder.com/90',
+                        fullName: sanitizeInput(data.fullName || 'غير محدد'),
+                        birthDate: formatDate(data.birthDate),
+                        gender: sanitizeInput(data.gender || 'غير محدد'),
+                        address: sanitizeInput(data.address || 'غير محدد'),
+                        idNumber: sanitizeInput(data.idNumber || 'غير محدد'),
+                        phoneNumber: sanitizeInput(data.phoneNumber || 'غير محدد'),
+                        issueDate: formatDate(data.issueDate),
+                        expiryDate: formatDate(data.expiryDate),
                         createdAt: data.createdAt?.toDate().toLocaleString('ar-MA') || 'غير محدد'
                     });
                 });
 
-                // تصفية البيانات بناءً على البحث والفلتر
                 const filteredUsers = users.filter(user => {
                     const fullName = user.fullName.toLowerCase();
                     const idNumber = user.idNumber.toLowerCase();
                     const gender = user.gender.toLowerCase();
-                    const searchTerm = searchQuery.toLowerCase();
+                    const searchTerm = sanitizeInput(searchQuery).toLowerCase();
                     const filterTerm = filterQuery.toLowerCase();
 
                     return (fullName.includes(searchTerm) || idNumber.includes(searchTerm)) &&
                            (filterTerm === '' || gender === filterTerm);
                 });
 
-                // تحديث عدد الأشخاص
                 const totalItems = filteredUsers.length;
                 countDisplay.textContent = `عدد الأشخاص: ${totalItems}`;
 
-                // تقسيم الصفحات
                 const startIdx = (page - 1) * itemsPerPage;
                 const endIdx = startIdx + itemsPerPage;
                 const paginatedUsers = filteredUsers.slice(startIdx, endIdx);
@@ -359,9 +343,10 @@
                 if (paginatedUsers.length === 0) {
                     noResultsMessage.style.display = 'block';
                 } else {
-                    paginatedUsers.forEach(user => {
+                    paginatedUsers.forEach((user, index) => {
                         const row = document.createElement('tr');
                         row.classList.add('animate__animated', 'animate__fadeInUp');
+                        row.style.animationDelay = `${index * 0.1}s`;
                         row.innerHTML = `
                             <td><img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
                             <td>${user.fullName}</td>
@@ -369,6 +354,7 @@
                             <td>${user.gender}</td>
                             <td>${user.address}</td>
                             <td>${user.idNumber}</td>
+                            <td>${user.phoneNumber}</td>
                             <td>${user.issueDate}</td>
                             <td>${user.expiryDate}</td>
                             <td>${user.createdAt}</td>
@@ -377,20 +363,22 @@
                     });
                 }
 
-                // إنشاء الصفحات
                 generatePagination(totalItems, page);
             } catch (error) {
-                console.error('خطأ أثناء جلب البيانات:', error);
+                console.error('خطأ:', error);
                 errorMessage.style.display = 'block';
+                errorMessage.textContent = `حدث خطأ أثناء جلب البيانات: ${error.message}`;
             } finally {
                 loadingSpinner.style.display = 'none';
             }
         }
 
-        // إنشاء أزرار التصفح
+        // إنشاء الصفحات
         function generatePagination(totalItems, currentPage) {
             paginationControls.innerHTML = '';
             const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+            if (totalPages <= 1) return;
 
             for (let i = 1; i <= totalPages; i++) {
                 const pageItem = document.createElement('li');
@@ -403,6 +391,7 @@
                 pageLink.textContent = i;
                 pageLink.addEventListener('click', (e) => {
                     e.preventDefault();
+                    currentPage = i;
                     fetchUsers(searchInput.value, filterSelect.value, i);
                 });
 
@@ -411,20 +400,19 @@
             }
         }
 
-        // تحميل البيانات عند فتح الصفحة
+        // تهيئة الصفحة
         fetchUsers();
 
-        // إضافة مستمع للبحث مع تأخير
+        // البحث والتصفية
         searchInput.addEventListener('input', debounce(() => {
             fetchUsers(searchInput.value, filterSelect.value, 1);
         }, 300));
 
-        // إضافة مستمع لتغيير الفلتر
         filterSelect.addEventListener('change', () => {
             fetchUsers(searchInput.value, filterSelect.value, 1);
         });
 
-        // دالة التأخير (debounce)
+        // دالة Debounce لتحسين الأداء
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
