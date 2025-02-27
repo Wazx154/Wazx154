@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -93,13 +94,13 @@
             width: 100%;
             min-width: 1200px;
             margin-bottom: 0;
-            cursor: pointer;
         }
 
         .table thead {
-            background: linear-gradient(90deg, #00695c, #4db6ac);
+            background: linear-gradient(90deg, #004d40, #26a69a);
             color: #fff;
             font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .table th, .table td {
@@ -113,8 +114,17 @@
             max-width: 150px;
         }
 
+        .table tbody {
+            background: #f9fbfc;
+        }
+
+        .table tbody tr {
+            transition: transform 0.2s ease;
+        }
+
         .table tbody tr:hover {
             background: #e6f3f5;
+            transform: translateY(-2px);
         }
 
         .table img {
@@ -128,6 +138,18 @@
 
         .table img:hover {
             transform: scale(1.1);
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 105, 92, 0.3);
         }
 
         .no-results, .error-message {
@@ -201,15 +223,17 @@
             color: #fff;
             border-bottom: none;
             padding: 15px 20px;
+            text-align: center; /* لتوسيط العنوان */
         }
 
         .modal-title {
             font-weight: 700;
             font-size: 1.5rem;
+            margin: 0 auto; /* توسيط العنوان */
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 25px;
             text-align: right;
         }
 
@@ -223,10 +247,23 @@
             object-fit: cover;
         }
 
+        .modal-body .section-title {
+            font-size: 1.2rem;
+            color: #00695c;
+            margin: 20px 0 10px;
+            border-bottom: 2px solid #e6f3f5;
+            padding-bottom: 5px;
+        }
+
         .modal-body .detail-item {
             margin-bottom: 15px;
             font-size: 1.1rem;
             color: #374151;
+        }
+
+        .modal-body .detail-item i {
+            margin-left: 10px;
+            color: #4db6ac;
         }
 
         .modal-body .detail-item strong {
@@ -254,20 +291,55 @@
             box-shadow: 0 5px 15px rgba(0, 77, 64, 0.3);
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .btn-success {
+            background: #2e7d32;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
+        .btn-success:hover {
+            background: #1b5e20;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        /* تحسين الاستجابة للشاشات الصغيرة */
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
             .container { padding: 20px; }
-            .table th, .table td { padding: 10px; font-size: 0.9rem; max-width: 100px; }
-            .table img { width: 60px; height: 60px; }
+            .table-responsive { overflow-x: hidden; }
+            .table { display: block; min-width: unset; }
+            .table thead { display: none; }
+            .table tbody, .table tr { display: block; width: 100%; }
+            .table tr {
+                background: #fff;
+                margin-bottom: 15px;
+                border-radius: 10px;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+                padding: 10px;
+            }
+            .table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px;
+                max-width: 100%;
+                border-bottom: 1px solid #e2e8f0;
+                font-size: 0.9rem;
+            }
+            .table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #00695c;
+            }
+            .table img { width: 60px; height: 60px; margin: 0 auto; }
             .search-filter-container { flex-direction: column; gap: 15px; }
             .count-box { font-size: 1rem; }
             .modal-body img { width: 120px; height: 120px; }
             .modal-body .detail-item { font-size: 1rem; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -304,6 +376,7 @@
                         <th>تاريخ الإصدار</th>
                         <th>تاريخ الانتهاء</th>
                         <th>تاريخ الإدخال</th>
+                        <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="user-list"></tbody>
@@ -313,6 +386,8 @@
         <nav>
             <ul class="pagination" id="pagination-controls"></ul>
         </nav>
+
+        <button id="export-btn" class="btn btn-success mt-3">تصدير كـCSV</button>
 
         <div id="no-results" class="no-results" style="display: none;">
             لا توجد نتائج مطابقة للبحث.
@@ -335,7 +410,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="userDetailsModalLabel">تفاصيل المستخدم</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                    <!-- إزالة زر الإغلاق العلوي -->
                 </div>
                 <div class="modal-body" id="modalBodyContent">
                     <!-- المحتوى سيتم إضافته ديناميكيًا -->
@@ -376,10 +451,12 @@
         const filterSelect = document.getElementById('filter-select');
         const countDisplay = document.getElementById('count-display');
         const paginationControls = document.getElementById('pagination-controls');
+        const exportBtn = document.getElementById('export-btn');
         const modalBodyContent = document.getElementById('modalBodyContent');
 
         const itemsPerPage = 10;
         let currentPage = 1;
+        let allUsers = [];
 
         // تنظيف المدخلات لمنع XSS
         function sanitizeInput(input) {
@@ -406,15 +483,17 @@
         function showUserDetails(user) {
             modalBodyContent.innerHTML = `
                 <img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
-                <div class="detail-item"><strong>الاسم الكامل:</strong> ${user.fullName}</div>
-                <div class="detail-item"><strong>تاريخ الميلاد:</strong> ${user.birthDate}</div>
-                <div class="detail-item"><strong>الجنس:</strong> ${formatGender(user.gender)}</div>
-                <div class="detail-item"><strong>العنوان:</strong> ${user.address}</div>
-                <div class="detail-item"><strong>رقم البطاقة:</strong> ${user.idNumber}</div>
-                <div class="detail-item"><strong>رقم الهاتف:</strong> ${user.phoneNumber}</div>
-                <div class="detail-item"><strong>تاريخ الإصدار:</strong> ${user.issueDate}</div>
-                <div class="detail-item"><strong>تاريخ الانتهاء:</strong> ${user.expiryDate}</div>
-                <div class="detail-item"><strong>تاريخ الإدخال:</strong> ${user.createdAt}</div>
+                <div class="section-title">المعلومات الشخصية</div>
+                <div class="detail-item"><i class="fas fa-user"></i><strong>الاسم الكامل:</strong> ${user.fullName}</div>
+                <div class="detail-item"><i class="fas fa-calendar-alt"></i><strong>تاريخ الميلاد:</strong> ${user.birthDate}</div>
+                <div class="detail-item"><i class="fas fa-venus-mars"></i><strong>الجنس:</strong> ${formatGender(user.gender)}</div>
+                <div class="detail-item"><i class="fas fa-map-marker-alt"></i><strong>العنوان:</strong> ${user.address}</div>
+                <div class="detail-item"><i class="fas fa-phone"></i><strong>رقم الهاتف:</strong> ${user.phoneNumber}</div>
+                <div class="section-title">معلومات البطاقة</div>
+                <div class="detail-item"><i class="fas fa-id-card"></i><strong>رقم البطاقة:</strong> ${user.idNumber}</div>
+                <div class="detail-item"><i class="fas fa-calendar-check"></i><strong>تاريخ الإصدار:</strong> ${user.issueDate}</div>
+                <div class="detail-item"><i class="fas fa-calendar-times"></i><strong>تاريخ الانتهاء:</strong> ${user.expiryDate}</div>
+                <div class="detail-item"><i class="fas fa-clock"></i><strong>تاريخ الإدخال:</strong> ${user.createdAt}</div>
             `;
             const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
             modal.show();
@@ -429,15 +508,15 @@
                 userList.innerHTML = '';
 
                 const querySnapshot = await getDocs(collection(db, 'national_id_data'));
-                const users = [];
+                allUsers = [];
 
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
-                    users.push({
+                    allUsers.push({
                         personalPhoto: data.personalPhoto || 'https://via.placeholder.com/90',
                         fullName: sanitizeInput(data.fullName || 'غير محدد'),
                         birthDate: formatDate(data.birthDate),
-                        gender: data.gender || 'غير محدد', // نتركها كما هي للتحويل لاحقًا
+                        gender: data.gender || 'غير محدد',
                         address: sanitizeInput(data.address || 'غير محدد'),
                         idNumber: sanitizeInput(data.idNumber || 'غير محدد'),
                         phoneNumber: sanitizeInput(data.phoneNumber || 'غير محدد'),
@@ -447,7 +526,7 @@
                     });
                 });
 
-                const filteredUsers = users.filter(user => {
+                const filteredUsers = allUsers.filter(user => {
                     const fullName = user.fullName.toLowerCase();
                     const idNumber = user.idNumber.toLowerCase();
                     const gender = user.gender.toLowerCase();
@@ -473,18 +552,22 @@
                         row.classList.add('animate__animated', 'animate__fadeInUp');
                         row.style.animationDelay = `${index * 0.1}s`;
                         row.innerHTML = `
-                            <td><img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
-                            <td>${user.fullName}</td>
-                            <td>${user.birthDate}</td>
-                            <td>${formatGender(user.gender)}</td> <!-- تحويل الجنس إلى العربية -->
-                            <td>${user.address}</td>
-                            <td>${user.idNumber}</td>
-                            <td>${user.phoneNumber}</td>
-                            <td>${user.issueDate}</td>
-                            <td>${user.expiryDate}</td>
-                            <td>${user.createdAt}</td>
+                            <td data-label="الصورة الشخصية"><img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
+                            <td data-label="الاسم الكامل">${user.fullName}</td>
+                            <td data-label="تاريخ الميلاد">${user.birthDate}</td>
+                            <td data-label="الجنس">${formatGender(user.gender)}</td>
+                            <td data-label="العنوان">${user.address}</td>
+                            <td data-label="رقم البطاقة">${user.idNumber}</td>
+                            <td data-label="رقم الهاتف">${user.phoneNumber}</td>
+                            <td data-label="تاريخ الإصدار">${user.issueDate}</td>
+                            <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
+                            <td data-label="تاريخ الإدخال">${user.createdAt}</td>
+                            <td data-label="الإجراءات"><button class="btn btn-sm btn-primary view-details" data-user='${JSON.stringify(user)}'>عرض التفاصيل</button></td>
                         `;
-                        row.addEventListener('click', () => showUserDetails(user));
+                        row.querySelector('.view-details').addEventListener('click', (e) => {
+                            const userData = JSON.parse(e.target.getAttribute('data-user'));
+                            showUserDetails(userData);
+                        });
                         userList.appendChild(row);
                     });
                 }
@@ -525,6 +608,20 @@
                 paginationControls.appendChild(pageItem);
             }
         }
+
+        // تصدير البيانات كـCSV
+        exportBtn.addEventListener('click', () => {
+            const csvHeader = "الاسم الكامل,تاريخ الميلاد,الجنس,العنوان,رقم البطاقة,رقم الهاتف,تاريخ الإصدار,تاريخ الانتهاء,تاريخ الإدخال\n";
+            const csvRows = allUsers.map(user => 
+                `${user.fullName},${user.birthDate},${formatGender(user.gender)},${user.address},${user.idNumber},${user.phoneNumber},${user.issueDate},${user.expiryDate},${user.createdAt}`
+            ).join('\n');
+            const csvContent = csvHeader + csvRows;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'national_id_data.csv';
+            link.click();
+        });
 
         // تهيئة الصفحة
         fetchUsers();
