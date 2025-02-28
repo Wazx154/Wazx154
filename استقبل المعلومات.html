@@ -140,16 +140,56 @@
             transform: scale(1.1);
         }
 
+        /* تحسين تصميم الأزرار */
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
         .btn-sm {
             padding: 8px 15px;
             font-size: 0.9rem;
-            border-radius: 8px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00796b, #26a69a);
+            color: #fff;
         }
 
         .btn-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 105, 92, 0.3);
+            background: linear-gradient(135deg, #004d40, #00796b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 105, 92, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 105, 92, 0.3);
+        }
+
+        .btn-success, .btn-home {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: #fff;
+            margin-left: 10px;
+        }
+
+        .btn-success:hover, .btn-home:hover {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-success:active, .btn-home:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
         }
 
         .no-results, .error-message {
@@ -223,13 +263,13 @@
             color: #fff;
             border-bottom: none;
             padding: 15px 20px;
-            text-align: center; /* لتوسيط العنوان */
+            text-align: center;
         }
 
         .modal-title {
             font-weight: 700;
             font-size: 1.5rem;
-            margin: 0 auto; /* توسيط العنوان */
+            margin: 0 auto;
         }
 
         .modal-body {
@@ -279,27 +319,23 @@
         }
 
         .modal-footer .btn {
-            background: #00695c;
+            background: linear-gradient(135deg, #00796b, #26a69a);
             color: #fff;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 12px 25px;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .modal-footer .btn:hover {
-            background: #004d40;
-            box-shadow: 0 5px 15px rgba(0, 77, 64, 0.3);
+            background: linear-gradient(135deg, #004d40, #00796b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 105, 92, 0.4);
         }
 
-        .btn-success {
-            background: #2e7d32;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .btn-success:hover {
-            background: #1b5e20;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        .modal-footer .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 105, 92, 0.3);
         }
 
         /* تحسين الاستجابة للشاشات الصغيرة */
@@ -335,6 +371,7 @@
             .count-box { font-size: 1rem; }
             .modal-body img { width: 120px; height: 120px; }
             .modal-body .detail-item { font-size: 1rem; }
+            .btn-success, .btn-home { display: block; margin: 10px auto; }
         }
 
         @keyframes fadeInUp {
@@ -387,7 +424,8 @@
             <ul class="pagination" id="pagination-controls"></ul>
         </nav>
 
-        <button id="export-btn" class="btn btn-success mt-3">تصدير كـCSV</button>
+        <button id="export-btn" class="btn btn-success mt-3"><i class="fas fa-download"></i> تصدير كـCSV</button>
+        <button id="home-btn" class="btn btn-home mt-3" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> الصفحة الرئيسية</button>
 
         <div id="no-results" class="no-results" style="display: none;">
             لا توجد نتائج مطابقة للبحث.
@@ -410,13 +448,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="userDetailsModalLabel">تفاصيل المستخدم</h5>
-                    <!-- إزالة زر الإغلاق العلوي -->
                 </div>
                 <div class="modal-body" id="modalBodyContent">
                     <!-- المحتوى سيتم إضافته ديناميكيًا -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn" data-bs-dismiss="modal"><i class="fas fa-times"></i> إغلاق</button>
                 </div>
             </div>
         </div>
@@ -452,7 +489,6 @@
         const countDisplay = document.getElementById('count-display');
         const paginationControls = document.getElementById('pagination-controls');
         const exportBtn = document.getElementById('export-btn');
-        const modalBodyContent = document.getElementById('modalBodyContent');
 
         const itemsPerPage = 10;
         let currentPage = 1;
@@ -481,7 +517,7 @@
 
         // عرض تفاصيل المستخدم في النافذة المنبثقة
         function showUserDetails(user) {
-            modalBodyContent.innerHTML = `
+            document.getElementById('modalBodyContent').innerHTML = `
                 <img src="${user.personalPhoto}" alt="الصورة الشخصية" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
                 <div class="section-title">المعلومات الشخصية</div>
                 <div class="detail-item"><i class="fas fa-user"></i><strong>الاسم الكامل:</strong> ${user.fullName}</div>
@@ -562,7 +598,7 @@
                             <td data-label="تاريخ الإصدار">${user.issueDate}</td>
                             <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
                             <td data-label="تاريخ الإدخال">${user.createdAt}</td>
-                            <td data-label="الإجراءات"><button class="btn btn-sm btn-primary view-details" data-user='${JSON.stringify(user)}'>عرض التفاصيل</button></td>
+                            <td data-label="الإجراءات"><button class="btn btn-sm btn-primary view-details" data-user='${JSON.stringify(user)}'><i class="fas fa-eye"></i> عرض التفاصيل</button></td>
                         `;
                         row.querySelector('.view-details').addEventListener('click', (e) => {
                             const userData = JSON.parse(e.target.getAttribute('data-user'));
