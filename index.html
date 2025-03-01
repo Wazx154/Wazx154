@@ -3,26 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدخال معلومات البطاقة الوطنية</title>
+    <title>إدخال معلومات البطاقة الوطنية المغربية</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
+        /* إعادة تعيين التنسيقات الأساسية */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* تنسيق الصفحة العام */
         body {
             background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
             font-family: 'Tajawal', sans-serif;
             min-height: 100vh;
             padding: 40px 20px;
             overflow-x: hidden;
+            color: #374151;
         }
 
+        /* تنسيق الحاوية الرئيسية */
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -33,6 +37,7 @@
             animation: fadeInUp 0.8s ease-in-out;
         }
 
+        /* تنسيق العنوان */
         h1 {
             text-align: center;
             color: #00695c;
@@ -42,6 +47,7 @@
             text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.05);
         }
 
+        /* تنسيق مجموعات النموذج */
         .form-group {
             margin-bottom: 25px;
             position: relative;
@@ -64,6 +70,7 @@
             background: #f9fafb;
             font-size: 1.1rem;
             transition: all 0.3s ease;
+            direction: rtl;
         }
 
         .form-control:focus, .form-select:focus {
@@ -77,6 +84,19 @@
             color: #9ca3af;
         }
 
+        /* تنسيق حقل رقم الهاتف لتبدأ الكتابة من اليمين */
+        #phone-number {
+            direction: rtl;
+            text-align: right; /* النص الفعلي والمثال يبدأ من اليمين */
+            padding-right: 40px; /* مسافة من اليمين لتجنب التداخل مع الأيقونة */
+            padding-left: 18px;
+        }
+
+        #phone-number::placeholder {
+            text-align: right; /* المثال يظهر على اليمين */
+        }
+
+        /* تنسيق الأيقونات داخل الحقول */
         .input-icon {
             position: absolute;
             top: 50%;
@@ -86,6 +106,7 @@
             font-size: 1.2rem;
         }
 
+        /* تنسيق حقل رفع الصورة */
         .file-input {
             margin-top: 10px;
         }
@@ -115,6 +136,7 @@
             opacity: 0;
         }
 
+        /* تنسيق معاينة الصورة */
         .image-preview {
             margin-top: 15px;
             text-align: center;
@@ -140,67 +162,68 @@
             display: none;
         }
 
+        /* تنسيق حاوية الأزرار */
         .button-container {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
             margin-top: 40px;
             flex-wrap: wrap;
         }
 
+        /* تنسيق الأزرار */
         .btn {
             padding: 12px 25px;
             font-size: 1.1rem;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 12px;
             border: none;
-            transition: all 0.3s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: #fff;
         }
 
         .btn-primary {
-            background: #00695c;
-            color: #fff;
+            background: linear-gradient(135deg, #00796b, #26a69a);
         }
 
         .btn-primary:hover {
-            background: #004d40;
+            background: linear-gradient(135deg, #004d40, #00796b);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 105, 92, 0.3);
+            box-shadow: 0 6px 15px rgba(0, 105, 92, 0.4);
         }
 
         .btn-success {
-            background: #2e7d32;
-            color: #fff;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
         }
 
         .btn-success:hover {
-            background: #1b5e20;
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.4);
         }
 
         .btn-danger {
-            background: #d32f2f;
-            color: #fff;
+            background: linear-gradient(135deg, #ef4444, #f87171);
         }
 
         .btn-danger:hover {
-            background: #b71c1c;
+            background: linear-gradient(135deg, #dc2626, #ef4444);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(211, 47, 47, 0.3);
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
         }
 
+        /* تنسيق رسالة النجاح */
         .success-message {
             display: none;
             text-align: center;
             padding: 20px;
             background: #e0f2e9;
             color: #004d40;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 20px;
             font-size: 1.2rem;
             font-weight: 600;
@@ -220,6 +243,7 @@
             animation: fadeInDown 0.5s ease;
         }
 
+        /* تنسيق طبقة التحميل */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -240,6 +264,7 @@
             color: #00695c;
         }
 
+        /* تنسيق رسائل الأخطاء */
         .error-message {
             color: #d32f2f;
             font-size: 0.9rem;
@@ -252,6 +277,7 @@
             box-shadow: 0 0 10px rgba(211, 47, 47, 0.2);
         }
 
+        /* الرسوم المتحركة */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -262,10 +288,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* الاستجابة للشاشات الصغيرة */
         @media (max-width: 768px) {
             body { padding: 20px; }
             h1 { font-size: 2rem; }
-            .container { padding: 20px; }
+            .container { padding: 25px; }
             .btn { font-size: 1rem; padding: 10px 20px; }
             .form-control, .form-select { font-size: 1rem; }
             .button-container { gap: 10px; }
@@ -273,19 +300,24 @@
     </style>
 </head>
 <body>
+    <!-- الحاوية الرئيسية -->
     <div class="container">
         <h1 class="animate__animated animate__fadeIn">إدخال معلومات البطاقة الوطنية المغربية</h1>
+        
+        <!-- النموذج -->
         <form id="national-id-form" class="animate__animated animate__fadeInUp">
             <div class="form-group">
                 <label for="full-name" class="form-label"><i class="fas fa-user"></i> الاسم الكامل</label>
                 <input type="text" class="form-control" id="full-name" placeholder="أدخل الاسم الكامل" required>
                 <div class="error-message" id="full-name-error">يرجى إدخال الاسم الكامل</div>
             </div>
+            
             <div class="form-group">
                 <label for="birth-date" class="form-label"><i class="fas fa-calendar-alt"></i> تاريخ الميلاد</label>
                 <input type="date" class="form-control" id="birth-date" required>
                 <div class="error-message" id="birth-date-error">يرجى إدخال تاريخ ميلاد صحيح</div>
             </div>
+            
             <div class="form-group">
                 <label for="gender" class="form-label"><i class="fas fa-venus-mars"></i> الجنس</label>
                 <select class="form-select" id="gender" required>
@@ -295,31 +327,37 @@
                 </select>
                 <div class="error-message" id="gender-error">يرجى اختيار الجنس</div>
             </div>
+            
             <div class="form-group">
                 <label for="address" class="form-label"><i class="fas fa-map-marker-alt"></i> العنوان</label>
                 <input type="text" class="form-control" id="address" placeholder="أدخل العنوان" required>
                 <div class="error-message" id="address-error">يرجى إدخال العنوان</div>
             </div>
+            
             <div class="form-group">
                 <label for="phone-number" class="form-label"><i class="fas fa-phone"></i> رقم الهاتف</label>
-                <input type="tel" class="form-control" id="phone-number" placeholder="مثال: +212600000000" pattern="\+212[5-7][0-9]{8}" required>
+                <input type="tel" class="form-control" id="phone-number" placeholder="+212600000000" pattern="\+212[5-7][0-9]{8}" required>
                 <div class="error-message" id="phone-number-error">يرجى إدخال رقم هاتف مغربي صحيح (مثال: +2126xxxxxxxx)</div>
             </div>
+            
             <div class="form-group">
                 <label for="id-number" class="form-label"><i class="fas fa-id-card"></i> رقم البطاقة الوطنية</label>
                 <input type="text" class="form-control" id="id-number" placeholder="أدخل رقم البطاقة" required>
                 <div class="error-message" id="id-number-error">يرجى إدخال رقم البطاقة الوطنية</div>
             </div>
+            
             <div class="form-group">
                 <label for="issue-date" class="form-label"><i class="fas fa-calendar-check"></i> تاريخ الإصدار</label>
                 <input type="date" class="form-control" id="issue-date" required>
                 <div class="error-message" id="issue-date-error">يرجى إدخال تاريخ إصدار صحيح</div>
             </div>
+            
             <div class="form-group">
                 <label for="expiry-date" class="form-label"><i class="fas fa-calendar-times"></i> تاريخ الانتهاء</label>
                 <input type="date" class="form-control" id="expiry-date" required>
                 <div class="error-message" id="expiry-date-error">تاريخ الانتهاء يجب أن يكون لاحقًا لتاريخ الإصدار</div>
             </div>
+            
             <div class="form-group">
                 <label for="personal-photo" class="form-label"><i class="fas fa-camera"></i> الصورة الشخصية</label>
                 <div class="file-input">
@@ -332,20 +370,27 @@
                 </div>
                 <div class="error-message" id="personal-photo-error">يرجى اختيار صورة شخصية</div>
             </div>
+            
+            <!-- أزرار النموذج -->
             <div class="button-container">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> إرسال</button>
                 <button type="button" class="btn btn-success" onclick="window.location.href='استقبل المعلومات.html'"><i class="fas fa-users"></i> قائمة المستخدمين</button>
                 <button type="button" id="logout-button" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
             </div>
         </form>
+        
+        <!-- رسالة النجاح -->
         <div id="success-message" class="success-message">تم إرسال البيانات بنجاح! 🎉</div>
     </div>
+
+    <!-- طبقة التحميل -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">جارٍ التحميل...</span>
         </div>
     </div>
 
+    <!-- السكربت -->
     <script type="module">
         // استيراد مكتبات Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -368,21 +413,21 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // تكوين Cloudinary
+        const cloudName = 'dgbsnye9w'; // استبدل بـ Cloud Name الخاص بك
+        const uploadPreset = 'my_upload_preset'; // استبدل بـ Upload Preset الخاص بك
+
         // التحقق من حالة تسجيل الدخول
         onAuthStateChanged(auth, (user) => {
             if (!user) window.location.href = 'login.html';
         });
 
-        // تسجيل الخروج
-        document.getElementById('logout-button').addEventListener('click', () => {
-            signOut(auth)
-                .then(() => window.location.href = 'login.html')
-                .catch((error) => console.error("خطأ أثناء تسجيل الخروج:", error));
-        });
-
-        // تكوين Cloudinary
-        const cloudName = 'dgbsnye9w'; // استبدل بـ Cloud Name الخاص بك
-        const uploadPreset = 'my_upload_preset'; // استبدل بـ Upload Preset الخاص بك
+        // دالة تنظيف المدخلات لمنع XSS
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
 
         // دالة تحميل الصورة إلى Cloudinary
         async function uploadToCloudinary(file) {
@@ -395,15 +440,7 @@
                 body: formData
             });
             if (!response.ok) throw new Error('فشل رفع الصورة إلى Cloudinary');
-            const data = await response.json();
-            return data.secure_url;
-        }
-
-        // تنظيف المدخلات لمنع XSS
-        function sanitizeInput(input) {
-            const div = document.createElement('div');
-            div.textContent = input;
-            return div.innerHTML;
+            return await response.json().then(data => data.secure_url);
         }
 
         // معاينة الصورة
@@ -421,17 +458,29 @@
             }
         });
 
+        // تسجيل الخروج
+        document.getElementById('logout-button').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('خطأ أثناء تسجيل الخروج:', error);
+            }
+        });
+
         // إرسال النموذج مع التحقق
         document.getElementById('national-id-form').addEventListener('submit', async (event) => {
             event.preventDefault();
+
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.style.display = 'flex';
 
-            // إعادة تعيين حالة الأخطاء
+            // إعادة تعيين الأخطاء
             document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
 
             try {
+                // جمع البيانات
                 const fullName = sanitizeInput(document.getElementById('full-name').value.trim());
                 const birthDate = document.getElementById('birth-date').value;
                 const gender = document.getElementById('gender').value;
@@ -444,6 +493,7 @@
 
                 // التحقق من الحقول
                 let hasError = false;
+
                 if (!fullName) {
                     document.getElementById('full-name-error').style.display = 'block';
                     document.getElementById('full-name').classList.add('is-invalid');
@@ -514,8 +564,6 @@
                 // إظهار رسالة النجاح
                 const successMessage = document.getElementById('success-message');
                 successMessage.classList.add('show');
-                loadingOverlay.style.display = 'none';
-
                 setTimeout(() => successMessage.classList.remove('show'), 3000);
 
                 // إعادة تعيين النموذج
@@ -523,9 +571,10 @@
                 document.getElementById('preview-image').style.display = 'none';
                 document.getElementById('upload-confirmation').style.display = 'none';
             } catch (error) {
-                console.error('خطأ:', error);
+                console.error('خطأ أثناء الإرسال:', error);
+                alert(`حدث خطأ: ${error.message}`);
+            } finally {
                 loadingOverlay.style.display = 'none';
-                alert(`حدث خطأ أثناء الإرسال: ${error.message}`);
             }
         });
     </script>
