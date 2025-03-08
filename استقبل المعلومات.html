@@ -77,7 +77,6 @@
             background: #e6f3f5;
             padding: 12px;
             border-radius: 10px;
-            border: 2px solid #4db6ac;
         }
 
         .table-responsive {
@@ -175,12 +174,12 @@
             margin: 30px 0;
             border-radius: 12px;
             background: #f8f9fa;
+            display: none;
         }
 
         .error-message {
             color: #d32f2f;
             background: #fee2e2;
-            display: none;
         }
 
         .loading-spinner {
@@ -278,7 +277,7 @@
 
         <div class="search-filter-container animate__animated animate__fadeIn">
             <div class="search-box">
-                <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
+                <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة أو الهاتف...">
             </div>
             <div class="filter-box">
                 <select id="filter-select" class="form-select">
@@ -315,11 +314,10 @@
         <nav><ul class="pagination" id="pagination-controls"></ul></nav>
 
         <button id="export-csv-btn" class="btn btn-success mt-3"><i class="fas fa-download"></i> تصدير CSV</button>
-        <button id="export-pdf-btn" class="btn btn-success mt-3"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
         <button id="refresh-btn" class="btn btn-refresh mt-3"><i class="fas fa-sync"></i> تحديث</button>
         <button id="home-btn" class="btn btn-home mt-3" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> الصفحة الرئيسية</button>
 
-        <div id="no-results" class="no-results" style="display: none;">لا توجد نتائج مطابقة</div>
+        <div id="no-results" class="no-results">لا توجد نتائج مطابقة</div>
         <div id="error-message" class="error-message">حدث خطأ أثناء جلب البيانات</div>
         <div id="loading-spinner" class="loading-spinner">
             <div class="spinner-border" role="status"><span class="visually-hidden">جارٍ التحميل...</span></div>
@@ -341,12 +339,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        const { jsPDF } = window.jspdf;
 
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
@@ -371,7 +366,6 @@
         const countDisplay = document.getElementById('count-display');
         const paginationControls = document.getElementById('pagination-controls');
         const exportCsvBtn = document.getElementById('export-csv-btn');
-        const exportPdfBtn = document.getElementById('export-pdf-btn');
         const refreshBtn = document.getElementById('refresh-btn');
 
         const itemsPerPage = 10;
@@ -525,37 +519,6 @@
             link.href = URL.createObjectURL(blob);
             link.download = 'national_id_data.csv';
             link.click();
-        });
-
-        // Export to PDF
-        exportPdfBtn.addEventListener('click', () => {
-            const doc = new jsPDF();
-            doc.setFont("Amiri", "normal");
-            doc.setFontSize(16);
-            doc.text("معلومات البطاقة الوطنية المغربية", 105, 10, { align: "center" });
-            doc.setFontSize(12);
-
-            const tableData = allUsers.map(user => [
-                user.fullName,
-                user.birthDate,
-                formatGender(user.gender),
-                user.address,
-                user.idNumber,
-                formatPhoneNumber(user.phoneNumber),
-                user.issueDate,
-                user.expiryDate,
-                user.createdAt
-            ]);
-
-            doc.autoTable({
-                head: [['الاسم', 'تاريخ الميلاد', 'الجنس', 'العنوان', 'رقم البطاقة', 'رقم الهاتف', 'تاريخ الإصدار', 'تاريخ الانتهاء', 'تاريخ الإدخال']],
-                body: tableData,
-                startY: 20,
-                styles: { font: "Amiri", halign: "right" },
-                headStyles: { fillColor: [0, 105, 92] }
-            });
-
-            doc.save('national_id_data.pdf');
         });
 
         // Refresh Data
