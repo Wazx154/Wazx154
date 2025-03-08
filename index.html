@@ -9,24 +9,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* إعادة تعيين التنسيقات الأساسية */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* تنسيق الصفحة العام */
         body {
             background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
             font-family: 'Tajawal', sans-serif;
             min-height: 100vh;
             padding: 40px 20px;
-            overflow-x: hidden;
             color: #374151;
         }
 
-        /* تنسيق الحاوية الرئيسية */
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -37,17 +33,14 @@
             animation: fadeInUp 0.8s ease-in-out;
         }
 
-        /* تنسيق العنوان */
         h1 {
             text-align: center;
             color: #00695c;
             font-weight: 700;
             font-size: 2.5rem;
             margin-bottom: 40px;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.05);
         }
 
-        /* تنسيق مجموعات النموذج */
         .form-group {
             margin-bottom: 25px;
             position: relative;
@@ -82,21 +75,15 @@
 
         .form-control::placeholder {
             color: #9ca3af;
+            text-align: right;
         }
 
-        /* تنسيق حقل رقم الهاتف لتبدأ الكتابة من اليمين */
         #phone-number {
-            direction: rtl;
-            text-align: right; /* النص الفعلي والمثال يبدأ من اليمين */
-            padding-right: 40px; /* مسافة من اليمين لتجنب التداخل مع الأيقونة */
-            padding-left: 18px;
+            direction: ltr;
+            text-align: left;
+            padding-left: 40px;
         }
 
-        #phone-number::placeholder {
-            text-align: right; /* المثال يظهر على اليمين */
-        }
-
-        /* تنسيق الأيقونات داخل الحقول */
         .input-icon {
             position: absolute;
             top: 50%;
@@ -106,7 +93,6 @@
             font-size: 1.2rem;
         }
 
-        /* تنسيق حقل رفع الصورة */
         .file-input {
             margin-top: 10px;
         }
@@ -130,16 +116,7 @@
         }
 
         .file-input input[type="file"] {
-            position: absolute;
-            width: 0;
-            height: 0;
-            opacity: 0;
-        }
-
-        /* تنسيق معاينة الصورة */
-        .image-preview {
-            margin-top: 15px;
-            text-align: center;
+            display: none;
         }
 
         .image-preview img {
@@ -147,12 +124,8 @@
             max-height: 200px;
             border-radius: 10px;
             border: 3px solid #00695c;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .image-preview img:hover {
-            transform: scale(1.05);
+            margin-top: 15px;
+            display: none;
         }
 
         .upload-confirmation {
@@ -162,7 +135,6 @@
             display: none;
         }
 
-        /* تنسيق حاوية الأزرار */
         .button-container {
             display: flex;
             gap: 20px;
@@ -171,7 +143,6 @@
             flex-wrap: wrap;
         }
 
-        /* تنسيق الأزرار */
         .btn {
             padding: 12px 25px;
             font-size: 1.1rem;
@@ -182,7 +153,6 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             color: #fff;
         }
 
@@ -192,8 +162,6 @@
 
         .btn-primary:hover {
             background: linear-gradient(135deg, #004d40, #00796b);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 105, 92, 0.4);
         }
 
         .btn-success {
@@ -202,8 +170,6 @@
 
         .btn-success:hover {
             background: linear-gradient(135deg, #1b5e20, #2e7d32);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.4);
         }
 
         .btn-danger {
@@ -212,11 +178,8 @@
 
         .btn-danger:hover {
             background: linear-gradient(135deg, #dc2626, #ef4444);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
         }
 
-        /* تنسيق رسالة النجاح */
         .success-message {
             display: none;
             text-align: center;
@@ -226,9 +189,6 @@
             border-radius: 12px;
             margin-top: 20px;
             font-size: 1.2rem;
-            font-weight: 600;
-            border: 2px solid #4db6ac;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             position: fixed;
             top: 50%;
             left: 50%;
@@ -243,7 +203,6 @@
             animation: fadeInDown 0.5s ease;
         }
 
-        /* تنسيق طبقة التحميل */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -260,11 +219,9 @@
         .spinner-border {
             width: 3rem;
             height: 3rem;
-            border-width: 0.3em;
             color: #00695c;
         }
 
-        /* تنسيق رسائل الأخطاء */
         .error-message {
             color: #d32f2f;
             font-size: 0.9rem;
@@ -274,10 +231,8 @@
 
         .is-invalid {
             border-color: #d32f2f !important;
-            box-shadow: 0 0 10px rgba(211, 47, 47, 0.2);
         }
 
-        /* الرسوم المتحركة */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -288,23 +243,19 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* الاستجابة للشاشات الصغيرة */
         @media (max-width: 768px) {
             body { padding: 20px; }
             h1 { font-size: 2rem; }
             .container { padding: 25px; }
             .btn { font-size: 1rem; padding: 10px 20px; }
             .form-control, .form-select { font-size: 1rem; }
-            .button-container { gap: 10px; }
         }
     </style>
 </head>
 <body>
-    <!-- الحاوية الرئيسية -->
     <div class="container">
         <h1 class="animate__animated animate__fadeIn">إدخال معلومات البطاقة الوطنية المغربية</h1>
         
-        <!-- النموذج -->
         <form id="national-id-form" class="animate__animated animate__fadeInUp">
             <div class="form-group">
                 <label for="full-name" class="form-label"><i class="fas fa-user"></i> الاسم الكامل</label>
@@ -336,7 +287,7 @@
             
             <div class="form-group">
                 <label for="phone-number" class="form-label"><i class="fas fa-phone"></i> رقم الهاتف</label>
-                <input type="tel" class="form-control" id="phone-number" placeholder="+212600000000" pattern="\+212[5-7][0-9]{8}" required>
+                <input type="tel" class="form-control" id="phone-number" placeholder="+212600000000" required>
                 <div class="error-message" id="phone-number-error">يرجى إدخال رقم هاتف مغربي صحيح (مثال: +2126xxxxxxxx)</div>
             </div>
             
@@ -364,14 +315,13 @@
                     <input type="file" id="personal-photo" accept="image/*" required>
                     <label for="personal-photo" class="file-input-label">اختر صورة شخصية</label>
                 </div>
-                <div class="image-preview" id="image-preview">
-                    <img id="preview-image" src="#" alt="معاينة الصورة" style="display: none;">
+                <div class="image-preview">
+                    <img id="preview-image" src="#" alt="معاينة الصورة">
                     <div id="upload-confirmation" class="upload-confirmation">تم تحميل الصورة بنجاح!</div>
                 </div>
                 <div class="error-message" id="personal-photo-error">يرجى اختيار صورة شخصية</div>
             </div>
             
-            <!-- أزرار النموذج -->
             <div class="button-container">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> إرسال</button>
                 <button type="button" class="btn btn-success" onclick="window.location.href='استقبل المعلومات.html'"><i class="fas fa-users"></i> قائمة المستخدمين</button>
@@ -379,25 +329,20 @@
             </div>
         </form>
         
-        <!-- رسالة النجاح -->
         <div id="success-message" class="success-message">تم إرسال البيانات بنجاح! 🎉</div>
     </div>
 
-    <!-- طبقة التحميل -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">جارٍ التحميل...</span>
         </div>
     </div>
 
-    <!-- السكربت -->
     <script type="module">
-        // استيراد مكتبات Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -408,28 +353,23 @@
             measurementId: "G-1XJJGHR2W4"
         };
 
-        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // تكوين Cloudinary
-        const cloudName = 'dgbsnye9w'; // استبدل بـ Cloud Name الخاص بك
-        const uploadPreset = 'my_upload_preset'; // استبدل بـ Upload Preset الخاص بك
+        const cloudName = 'dgbsnye9w';
+        const uploadPreset = 'my_upload_preset';
 
-        // التحقق من حالة تسجيل الدخول
         onAuthStateChanged(auth, (user) => {
             if (!user) window.location.href = 'login.html';
         });
 
-        // دالة تنظيف المدخلات لمنع XSS
         function sanitizeInput(input) {
             const div = document.createElement('div');
             div.textContent = input;
             return div.innerHTML;
         }
 
-        // دالة تحميل الصورة إلى Cloudinary
         async function uploadToCloudinary(file) {
             if (!file) throw new Error('لم يتم اختيار صورة');
             const formData = new FormData();
@@ -439,26 +379,34 @@
                 method: 'POST',
                 body: formData
             });
-            if (!response.ok) throw new Error('فشل رفع الصورة إلى Cloudinary');
-            return await response.json().then(data => data.secure_url);
+            if (!response.ok) throw new Error('فشل رفع الصورة');
+            const data = await response.json();
+            return data.secure_url;
         }
 
-        // معاينة الصورة
+        const phoneInput = document.getElementById('phone-number');
+        phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (!value.startsWith('212')) value = '212' + value;
+            value = value.slice(0, 12);
+            e.target.value = '+' + value;
+        });
+
         document.getElementById('personal-photo').addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const previewImage = document.getElementById('preview-image');
+                    const confirmation = document.getElementById('upload-confirmation');
                     previewImage.src = e.target.result;
                     previewImage.style.display = 'block';
-                    document.getElementById('upload-confirmation').style.display = 'block';
+                    confirmation.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // تسجيل الخروج
         document.getElementById('logout-button').addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -468,19 +416,15 @@
             }
         });
 
-        // إرسال النموذج مع التحقق
         document.getElementById('national-id-form').addEventListener('submit', async (event) => {
             event.preventDefault();
-
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.style.display = 'flex';
 
-            // إعادة تعيين الأخطاء
             document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
 
             try {
-                // جمع البيانات
                 const fullName = sanitizeInput(document.getElementById('full-name').value.trim());
                 const birthDate = document.getElementById('birth-date').value;
                 const gender = document.getElementById('gender').value;
@@ -491,51 +435,42 @@
                 const expiryDate = document.getElementById('expiry-date').value;
                 const personalPhoto = document.getElementById('personal-photo').files[0];
 
-                // التحقق من الحقول
                 let hasError = false;
 
                 if (!fullName) {
-                    document.getElementById('full-name-error').style.display = 'block';
-                    document.getElementById('full-name').classList.add('is-invalid');
+                    showError('full-name');
                     hasError = true;
                 }
                 if (!birthDate) {
-                    document.getElementById('birth-date-error').style.display = 'block';
-                    document.getElementById('birth-date').classList.add('is-invalid');
+                    showError('birth-date');
                     hasError = true;
                 }
                 if (!gender) {
-                    document.getElementById('gender-error').style.display = 'block';
-                    document.getElementById('gender').classList.add('is-invalid');
+                    showError('gender');
                     hasError = true;
                 }
                 if (!address) {
-                    document.getElementById('address-error').style.display = 'block';
-                    document.getElementById('address').classList.add('is-invalid');
+                    showError('address');
                     hasError = true;
                 }
-                if (!phoneNumber.match(/\+212[5-7][0-9]{8}/)) {
-                    document.getElementById('phone-number-error').style.display = 'block';
-                    document.getElementById('phone-number').classList.add('is-invalid');
+                if (!phoneNumber.match(/^\+212[5-7][0-9]{8}$/)) {
+                    showError('phone-number');
                     hasError = true;
                 }
                 if (!idNumber) {
-                    document.getElementById('id-number-error').style.display = 'block';
-                    document.getElementById('id-number').classList.add('is-invalid');
+                    showError('id-number');
                     hasError = true;
                 }
                 if (!issueDate) {
-                    document.getElementById('issue-date-error').style.display = 'block';
-                    document.getElementById('issue-date').classList.add('is-invalid');
+                    showError('issue-date');
                     hasError = true;
                 }
                 if (!expiryDate || new Date(expiryDate) <= new Date(issueDate)) {
-                    document.getElementById('expiry-date-error').style.display = 'block';
-                    document.getElementById('expiry-date').classList.add('is-invalid');
+                    showError('expiry-date');
                     hasError = true;
                 }
                 if (!personalPhoto) {
-                    document.getElementById('personal-photo-error').style.display = 'block';
+                    showError('personal-photo');
                     hasError = true;
                 }
 
@@ -544,10 +479,8 @@
                     return;
                 }
 
-                // رفع الصورة إلى Cloudinary
                 const personalPhotoURL = await uploadToCloudinary(personalPhoto);
 
-                // إرسال البيانات إلى Firestore
                 await addDoc(collection(db, 'national_id_data'), {
                     fullName,
                     birthDate,
@@ -561,22 +494,25 @@
                     createdAt: serverTimestamp()
                 });
 
-                // إظهار رسالة النجاح
                 const successMessage = document.getElementById('success-message');
                 successMessage.classList.add('show');
                 setTimeout(() => successMessage.classList.remove('show'), 3000);
 
-                // إعادة تعيين النموذج
                 document.getElementById('national-id-form').reset();
                 document.getElementById('preview-image').style.display = 'none';
                 document.getElementById('upload-confirmation').style.display = 'none';
             } catch (error) {
                 console.error('خطأ أثناء الإرسال:', error);
-                alert(`حدث خطأ: ${error.message}`);
+                alert('حدث خطأ أثناء إرسال البيانات');
             } finally {
                 loadingOverlay.style.display = 'none';
             }
         });
+
+        function showError(fieldId) {
+            document.getElementById(`${fieldId}-error`).style.display = 'block';
+            document.getElementById(fieldId).classList.add('is-invalid');
+        }
     </script>
 </body>
 </html>
