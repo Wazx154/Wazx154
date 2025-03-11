@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* الأنماط السابقة بدون تغيير */
         * {
             margin: 0;
             padding: 0;
@@ -30,6 +31,7 @@
             border-radius: 25px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
             animation: fadeInUp 0.8s ease-in-out;
+            overflow: hidden;
         }
 
         h1 {
@@ -38,6 +40,7 @@
             font-weight: 700;
             font-size: 2.5rem;
             margin-bottom: 40px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .search-filter-container {
@@ -46,6 +49,11 @@
             margin-bottom: 40px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .search-box, .filter-box {
@@ -57,26 +65,44 @@
             padding: 12px 18px;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
-            background: #f9fafb;
-            font-size: 1.1rem;
+            background: #fff;
+            font-size: 1rem;
             transition: all 0.3s ease;
         }
 
         .form-control:focus, .form-select:focus {
             border-color: #00695c;
-            background: #fff;
             box-shadow: 0 0 10px rgba(0, 105, 92, 0.2);
             outline: none;
         }
 
-        .count-box {
-            text-align: center;
+        .form-control::placeholder {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 15px;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stats-box {
+            flex: 1;
+            text-align: center;
             font-size: 1.2rem;
-            color: #374151;
-            background: #e6f3f5;
-            padding: 12px;
+            padding: 15px;
             border-radius: 10px;
+            color: #fff;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-box:hover {
+            transform: translateY(-5px);
         }
 
         .table-responsive {
@@ -96,6 +122,7 @@
             background: linear-gradient(90deg, #004d40, #26a69a);
             color: #fff;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .table th, .table td {
@@ -108,11 +135,17 @@
             text-overflow: ellipsis;
         }
 
-        .table tbody tr:hover {
-            background: #e6f3f5;
-            transform: translateY(-2px);
+        .table tbody tr {
             transition: all 0.2s ease;
         }
+
+        .table tbody tr:hover {
+            background: #e6f3f5;
+            transform: scale(1.01);
+        }
+
+        .expired { background-color: #fee2e2; }
+        .active { background-color: #e6ffe6; }
 
         .table img {
             width: 80px;
@@ -120,6 +153,11 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #00695c;
+            transition: transform 0.3s ease;
+        }
+
+        .table img:hover {
+            transform: scale(1.1);
         }
 
         .phone-number {
@@ -141,6 +179,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .btn-sm {
@@ -157,14 +196,20 @@
             background: linear-gradient(135deg, #004d40, #00796b);
         }
 
-        .btn-success, .btn-home, .btn-refresh {
+        .btn-success, .btn-home, .btn-refresh, .btn-print {
             background: linear-gradient(135deg, #2e7d32, #4caf50);
             color: #fff;
             margin-left: 10px;
         }
 
-        .btn-success:hover, .btn-home:hover, .btn-refresh:hover {
-            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+        .btn-danger {
+            background: linear-gradient(135deg, #c62828, #ef5350);
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(110%);
         }
 
         .no-results, .error-message {
@@ -194,6 +239,11 @@
             color: #00695c;
         }
 
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+
         .pagination .page-link {
             border-radius: 50%;
             width: 40px;
@@ -204,6 +254,11 @@
             margin: 0 5px;
             color: #00695c;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background: #e6f3f5;
         }
 
         .pagination .page-item.active .page-link {
@@ -221,6 +276,7 @@
             color: #fff;
             border-bottom: none;
             text-align: center;
+            border-radius: 15px 15px 0 0;
         }
 
         .modal-body {
@@ -235,12 +291,20 @@
             border: 4px solid #00695c;
             margin: 0 auto 20px;
             display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-body img:hover {
+            transform: scale(1.05);
         }
 
         .modal-body .detail-item {
             margin-bottom: 15px;
             font-size: 1.1rem;
             color: #374151;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
         }
 
         .modal-body .detail-item i {
@@ -254,6 +318,20 @@
             margin-left: 10px;
         }
 
+        .delete-modal .modal-header {
+            background: linear-gradient(135deg, #c62828, #ef5350);
+        }
+
+        .delete-modal .modal-body, .save-modal .modal-body {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #374151;
+        }
+
+        .save-modal .modal-header {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+        }
+
         @media (max-width: 768px) {
             .table { min-width: unset; display: block; }
             .table thead { display: none; }
@@ -262,7 +340,8 @@
             .table td { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #e2e8f0; }
             .table td::before { content: attr(data-label); font-weight: 600; color: #00695c; }
             .search-filter-container { flex-direction: column; }
-            .btn-success, .btn-home, .btn-refresh { display: block; margin: 10px auto; }
+            .btn-success, .btn-home, .btn-refresh, .btn-print { margin: 10px auto; display: block; }
+            .stats-box { min-width: unset; width: 100%; }
         }
 
         @keyframes fadeInUp {
@@ -275,35 +354,49 @@
     <div class="container">
         <h1 class="animate__animated animate__fadeIn">عرض معلومات البطاقة الوطنية المغربية</h1>
 
+        <!-- إحصائيات سريعة -->
+        <div class="stats-container animate__animated animate__fadeIn">
+            <div class="stats-box" style="background: #00796b;">إجمالي البطاقات: <span id="totalCards">0</span></div>
+            <div class="stats-box" style="background: #2e7d32;">السارية: <span id="activeCards">0</span></div>
+            <div class="stats-box" style="background: #c62828;">المنتهية: <span id="expiredCards">0</span></div>
+        </div>
+
+        <!-- فلاتر البحث -->
         <div class="search-filter-container animate__animated animate__fadeIn">
             <div class="search-box">
                 <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة أو الهاتف...">
             </div>
             <div class="filter-box">
-                <select id="filter-select" class="form-select">
+                <select id="filter-gender" class="form-select">
                     <option value="">جميع الجنس</option>
                     <option value="male">ذكر</option>
                     <option value="female">أنثى</option>
                 </select>
             </div>
+            <div class="filter-box">
+                <select id="filter-status" class="form-select">
+                    <option value="">جميع الحالات</option>
+                    <option value="active">سارية</option>
+                    <option value="expired">منتهية</option>
+                </select>
+            </div>
         </div>
-
-        <div class="count-box" id="count-display">عدد الأشخاص: 0</div>
 
         <div class="table-responsive animate__animated animate__fadeIn">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>الصورة</th>
-                        <th>الاسم الكامل</th>
-                        <th>تاريخ الميلاد</th>
-                        <th>الجنس</th>
-                        <th>العنوان</th>
-                        <th>رقم البطاقة</th>
-                        <th>رقم الهاتف</th>
-                        <th>تاريخ الإصدار</th>
-                        <th>تاريخ الانتهاء</th>
-                        <th>تاريخ الإدخال</th>
+                        <th onclick="sortTable(0)">الصورة</th>
+                        <th onclick="sortTable(1)">الاسم الكامل <span>↑↓</span></th>
+                        <th onclick="sortTable(2)">تاريخ الميلاد <span>↑↓</span></th>
+                        <th onclick="sortTable(3)">الجنس <span>↑↓</span></th>
+                        <th onclick="sortTable(4)">العنوان <span>↑↓</span></th>
+                        <th onclick="sortTable(5)">رقم البطاقة <span>↑↓</span></th>
+                        <th onclick="sortTable(6)">رقم الهاتف <span>↑↓</span></th>
+                        <th onclick="sortTable(7)">تاريخ الإصدار <span>↑↓</span></th>
+                        <th onclick="sortTable(8)">تاريخ الانتهاء <span>↑↓</span></th>
+                        <th onclick="sortTable(9)">تاريخ الإدخال <span>↑↓</span></th>
+                        <th>الحالة</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -313,9 +406,12 @@
 
         <nav><ul class="pagination" id="pagination-controls"></ul></nav>
 
-        <button id="export-csv-btn" class="btn btn-success mt-3"><i class="fas fa-download"></i> تصدير CSV</button>
-        <button id="refresh-btn" class="btn btn-refresh mt-3"><i class="fas fa-sync"></i> تحديث</button>
-        <button id="home-btn" class="btn btn-home mt-3" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> الصفحة الرئيسية</button>
+        <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
+            <button id="export-excel-btn" class="btn btn-success"><i class="fas fa-download"></i> تصدير Excel</button>
+            <button id="print-btn" class="btn btn-print"><i class="fas fa-print"></i> طباعة</button>
+            <button id="refresh-btn" class="btn btn-refresh"><i class="fas fa-sync"></i> تحديث</button>
+            <button id="home-btn" class="btn btn-home" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> الصفحة الرئيسية</button>
+        </div>
 
         <div id="no-results" class="no-results">لا توجد نتائج مطابقة</div>
         <div id="error-message" class="error-message">حدث خطأ أثناء جلب البيانات</div>
@@ -324,6 +420,7 @@
         </div>
     </div>
 
+    <!-- نافذة التفاصيل -->
     <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -338,11 +435,110 @@
         </div>
     </div>
 
+    <!-- نافذة التعديل -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">تعديل البطاقة</h5>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-doc-id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>الاسم الكامل</label>
+                            <input type="text" id="edit-fullName" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>تاريخ الميلاد</label>
+                            <input type="date" id="edit-birthDate" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>الجنس</label>
+                            <select id="edit-gender" class="form-select" required>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>العنوان</label>
+                            <input type="text" id="edit-address" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>رقم الهاتف</label>
+                            <input type="text" id="edit-phoneNumber" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>رقم البطاقة</label>
+                            <input type="text" id="edit-idNumber" class="form-control" required> <!-- إزالة disabled -->
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>تاريخ الإصدار</label>
+                            <input type="date" id="edit-issueDate" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>تاريخ الانتهاء</label>
+                            <input type="date" id="edit-expiryDate" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>الصورة الشخصية (رابط)</label>
+                            <input type="text" id="edit-personalPhoto" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-success" id="save-edit-btn">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد الحذف -->
+    <div class="modal fade delete-modal" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">تأكيد الحذف</h5>
+                </div>
+                <div class="modal-body">
+                    <p>هل أنت متأكد من حذف هذه البطاقة؟</p>
+                    <p id="delete-user-name" class="fw-bold text-danger"></p>
+                    <small class="text-muted">هذا الإجراء لا يمكن التراجع عنه!</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">حذف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد الحفظ -->
+    <div class="modal fade save-modal" id="saveConfirmModal" tabindex="-1" aria-labelledby="saveConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saveConfirmModalLabel">تم الحفظ بنجاح</h5>
+                </div>
+                <div class="modal-body">
+                    <p>تم حفظ التعديلات على البطاقة بنجاح!</p>
+                    <p id="save-user-name" class="fw-bold text-success"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // تهيئة Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -356,50 +552,60 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // DOM Elements
+        // العناصر في DOM
         const userList = document.getElementById('user-list');
         const noResults = document.getElementById('no-results');
         const errorMessage = document.getElementById('error-message');
         const loadingSpinner = document.getElementById('loading-spinner');
         const searchInput = document.getElementById('search-input');
-        const filterSelect = document.getElementById('filter-select');
-        const countDisplay = document.getElementById('count-display');
+        const filterGender = document.getElementById('filter-gender');
+        const filterStatus = document.getElementById('filter-status');
         const paginationControls = document.getElementById('pagination-controls');
-        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const exportExcelBtn = document.getElementById('export-excel-btn');
+        const printBtn = document.getElementById('print-btn');
         const refreshBtn = document.getElementById('refresh-btn');
+        const totalCards = document.getElementById('totalCards');
+        const activeCards = document.getElementById('activeCards');
+        const expiredCards = document.getElementById('expiredCards');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
         const itemsPerPage = 10;
         let currentPage = 1;
         let allUsers = [];
+        let sortColumn = 1;
+        let sortDirection = 1;
+        let deleteId = null;
 
-        // Sanitize Input
+        // دالة لتنظيف المدخلات
         function sanitizeInput(input) {
             const div = document.createElement('div');
-            div.textContent = input;
+            div.textContent = input || '';
             return div.innerHTML;
         }
 
-        // Format Date
+        // تنسيق التاريخ
         function formatDate(dateString) {
             if (!dateString) return 'غير محدد';
             const date = new Date(dateString);
             return isNaN(date) ? 'غير محدد' : date.toLocaleDateString('ar-MA');
         }
 
-        // Format Gender
+        // تنسيق الجنس
         function formatGender(gender) {
             return gender === 'male' ? 'ذكر' : gender === 'female' ? 'أنثى' : sanitizeInput(gender) || 'غير محدد';
         }
 
-        // Format Phone Number
+        // تنسيق رقم الهاتف
         function formatPhoneNumber(phone) {
             if (!phone || !phone.match(/^\+212[5-7][0-9]{8}$/)) return sanitizeInput(phone) || 'غير محدد';
             return `${phone.slice(0, 4)}-${phone.slice(4, 7)}-${phone.slice(7)}`;
         }
 
-        // Show User Details in Modal
+        // عرض تفاصيل المستخدم
         function showUserDetails(user) {
-            document.getElementById('modalBodyContent').innerHTML = `
+            const modalBodyContent = document.getElementById('modalBodyContent');
+            modalBodyContent.innerHTML = `
                 <img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
                 <div class="detail-item"><i class="fas fa-user"></i><strong>الاسم الكامل:</strong> ${user.fullName}</div>
                 <div class="detail-item"><i class="fas fa-calendar-alt"></i><strong>تاريخ الميلاد:</strong> ${user.birthDate}</div>
@@ -415,8 +621,124 @@
             modal.show();
         }
 
-        // Fetch Users
-        async function fetchUsers(searchQuery = '', filterQuery = '', page = 1) {
+        // تعديل المستخدم
+        function editUser(docId) {
+            const user = allUsers.find(u => u.docId === docId);
+            if (!user) {
+                alert('لم يتم العثور على المستخدم!');
+                return;
+            }
+            document.getElementById('edit-doc-id').value = docId;
+            document.getElementById('edit-fullName').value = user.fullName;
+            document.getElementById('edit-birthDate').value = user.birthDateRaw || '';
+            document.getElementById('edit-gender').value = user.gender || 'male';
+            document.getElementById('edit-address').value = user.address;
+            document.getElementById('edit-phoneNumber').value = user.phoneNumber;
+            document.getElementById('edit-idNumber').value = user.idNumber;
+            document.getElementById('edit-issueDate').value = user.issueDateRaw || '';
+            document.getElementById('edit-expiryDate').value = user.expiryDateRaw || '';
+            document.getElementById('edit-personalPhoto').value = user.personalPhoto;
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        // حفظ التعديلات
+        async function saveEdit() {
+            const docId = document.getElementById('edit-doc-id').value;
+            const fullName = sanitizeInput(document.getElementById('edit-fullName').value);
+            const birthDate = document.getElementById('edit-birthDate').value;
+            const gender = document.getElementById('edit-gender').value;
+            const address = sanitizeInput(document.getElementById('edit-address').value);
+            const phoneNumber = sanitizeInput(document.getElementById('edit-phoneNumber').value);
+            const idNumber = sanitizeInput(document.getElementById('edit-idNumber').value);
+            const issueDate = document.getElementById('edit-issueDate').value;
+            const expiryDate = document.getElementById('edit-expiryDate').value;
+            const personalPhoto = sanitizeInput(document.getElementById('edit-personalPhoto').value);
+
+            // التحقق من الحقول
+            if (!docId || !fullName || !birthDate || !gender || !address || !phoneNumber || !idNumber || !issueDate || !expiryDate || !personalPhoto) {
+                alert('يرجى ملء جميع الحقول المطلوبة!');
+                return;
+            }
+
+            try {
+                // التحقق مما إذا كان رقم البطاقة الجديد موجود مسبقًا (في حال تغييره)
+                const oldUser = allUsers.find(u => u.docId === docId);
+                if (oldUser.idNumber !== idNumber) {
+                    const idCheck = await getDoc(doc(db, 'national_id_data', idNumber));
+                    if (idCheck.exists()) {
+                        alert('رقم البطاقة الجديد موجود مسبقًا! يرجى اختيار رقم آخر.');
+                        return;
+                    }
+                    // حذف المستند القديم وإنشاء مستند جديد برقم البطاقة الجديد
+                    await deleteDoc(doc(db, 'national_id_data', docId));
+                    await setDoc(doc(db, 'national_id_data', idNumber), {
+                        fullName,
+                        birthDate,
+                        gender,
+                        address,
+                        phoneNumber,
+                        idNumber,
+                        issueDate,
+                        expiryDate,
+                        personalPhoto,
+                        createdAt: oldUser.createdAtRaw || new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    });
+                } else {
+                    // تحديث المستند الحالي إذا لم يتغير رقم البطاقة
+                    await updateDoc(doc(db, 'national_id_data', docId), {
+                        fullName,
+                        birthDate,
+                        gender,
+                        address,
+                        phoneNumber,
+                        idNumber,
+                        issueDate,
+                        expiryDate,
+                        personalPhoto,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                document.getElementById('save-user-name').textContent = fullName;
+                const saveModal = new bootstrap.Modal(document.getElementById('saveConfirmModal'));
+                saveModal.show();
+
+                fetchUsers(); // تحديث البيانات
+            } catch (error) {
+                console.error('خطأ في حفظ التعديلات:', error);
+                alert('حدث خطأ أثناء حفظ التعديلات: ' + error.message);
+            }
+        }
+
+        // تأكيد الحذف
+        function confirmDeleteUser(docId) {
+            const user = allUsers.find(u => u.docId === docId);
+            if (!user) return;
+            deleteId = docId;
+            document.getElementById('delete-user-name').textContent = user.fullName;
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
+        }
+
+        // حذف المستخدم
+        async function deleteUser() {
+            if (!deleteId) return;
+            try {
+                await deleteDoc(doc(db, 'national_id_data', deleteId));
+                bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                deleteId = null;
+                fetchUsers(); // تحديث البيانات بعد الحذف
+            } catch (error) {
+                console.error('خطأ في الحذف:', error);
+                alert('حدث خطأ أثناء الحذف: ' + error.message);
+            }
+        }
+
+        // جلب البيانات
+        async function fetchUsers(searchQuery = '', genderFilter = '', page = 1) {
             loadingSpinner.style.display = 'block';
             errorMessage.style.display = 'none';
             noResults.style.display = 'none';
@@ -429,39 +751,39 @@
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
                     allUsers.push({
+                        docId: doc.id,
                         personalPhoto: data.personalPhoto || 'https://via.placeholder.com/90',
-                        fullName: sanitizeInput(data.fullName || 'غير محدد'),
+                        fullName: sanitizeInput(data.fullName) || 'غير محدد',
                         birthDate: formatDate(data.birthDate),
+                        birthDateRaw: data.birthDate || '',
                         gender: data.gender || 'غير محدد',
-                        address: sanitizeInput(data.address || 'غير محدد'),
-                        idNumber: sanitizeInput(data.idNumber || 'غير محدد'),
-                        phoneNumber: sanitizeInput(data.phoneNumber || 'غير محدد'),
+                        address: sanitizeInput(data.address) || 'غير محدد',
+                        idNumber: sanitizeInput(data.idNumber) || 'غير محدد',
+                        phoneNumber: sanitizeInput(data.phoneNumber) || 'غير محدد',
                         issueDate: formatDate(data.issueDate),
+                        issueDateRaw: data.issueDate || '',
                         expiryDate: formatDate(data.expiryDate),
-                        createdAt: data.createdAt?.toDate().toLocaleString('ar-MA') || 'غير محدد'
+                        expiryDateRaw: data.expiryDate || '',
+                        createdAt: data.createdAt ? new Date(data.createdAt).toLocaleString('ar-MA') : 'غير محدد',
+                        createdAtRaw: data.createdAt || ''
                     });
                 });
 
-                const filteredUsers = allUsers.filter(user => {
-                    const searchTerm = sanitizeInput(searchQuery).toLowerCase();
-                    const filterTerm = filterQuery.toLowerCase();
-                    return (user.fullName.toLowerCase().includes(searchTerm) ||
-                            user.idNumber.toLowerCase().includes(searchTerm) ||
-                            user.phoneNumber.toLowerCase().includes(searchTerm)) &&
-                           (filterTerm === '' || user.gender.toLowerCase() === filterTerm);
-                });
+                const filteredUsers = filterUsers(searchQuery, genderFilter);
+                updateStats(filteredUsers);
 
-                countDisplay.textContent = `عدد الأشخاص: ${filteredUsers.length}`;
+                const sortedUsers = sortUsers(filteredUsers);
                 const startIdx = (page - 1) * itemsPerPage;
-                const paginatedUsers = filteredUsers.slice(startIdx, startIdx + itemsPerPage);
+                const paginatedUsers = sortedUsers.slice(startIdx, startIdx + itemsPerPage);
 
                 if (paginatedUsers.length === 0) {
                     noResults.style.display = 'block';
                 } else {
                     paginatedUsers.forEach((user, index) => {
+                        const isExpired = new Date(user.expiryDateRaw) < new Date();
                         const row = document.createElement('tr');
-                        row.classList.add('animate__animated', 'animate__fadeInUp');
-                        row.style.animationDelay = `${index * 0.1}s`;
+                        row.classList.add('animate__animated', 'animate__fadeInUp', isExpired ? 'expired' : 'active');
+                        row.style.animationDelay = `${index * 0.05}s`;
                         row.innerHTML = `
                             <td data-label="الصورة"><img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
                             <td data-label="الاسم الكامل">${user.fullName}</td>
@@ -473,23 +795,75 @@
                             <td data-label="تاريخ الإصدار">${user.issueDate}</td>
                             <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
                             <td data-label="تاريخ الإدخال">${user.createdAt}</td>
-                            <td data-label="الإجراءات"><button class="btn btn-sm btn-primary view-details" data-user='${JSON.stringify(user)}'><i class="fas fa-eye"></i> التفاصيل</button></td>
+                            <td data-label="الحالة">${isExpired ? 'منتهية' : 'سارية'}</td>
+                            <td data-label="الإجراءات">
+                                <button class="btn btn-sm btn-primary view-details"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-sm btn-success edit-user"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger delete-user"><i class="fas fa-trash"></i></button>
+                            </td>
                         `;
-                        row.querySelector('.view-details').addEventListener('click', (e) => showUserDetails(JSON.parse(e.target.getAttribute('data-user'))));
+                        row.querySelector('.view-details').addEventListener('click', () => showUserDetails(user));
+                        row.querySelector('.edit-user').addEventListener('click', () => editUser(user.docId));
+                        row.querySelector('.delete-user').addEventListener('click', () => confirmDeleteUser(user.docId));
                         userList.appendChild(row);
                     });
                 }
 
-                generatePagination(filteredUsers.length, page);
+                generatePagination(sortedUsers.length, page);
             } catch (error) {
-                console.error('خطأ:', error);
+                console.error('خطأ في جلب البيانات:', error);
                 errorMessage.style.display = 'block';
             } finally {
                 loadingSpinner.style.display = 'none';
             }
         }
 
-        // Generate Pagination
+        // تصفية المستخدمين
+        function filterUsers(searchQuery, genderFilter) {
+            const searchTerm = sanitizeInput(searchQuery).toLowerCase();
+            const genderTerm = genderFilter.toLowerCase();
+            const statusFilter = filterStatus.value;
+
+            return allUsers.filter(user => {
+                const isExpired = new Date(user.expiryDateRaw) < new Date();
+                return (user.fullName.toLowerCase().includes(searchTerm) ||
+                        user.idNumber.toLowerCase().includes(searchTerm) ||
+                        user.phoneNumber.toLowerCase().includes(searchTerm)) &&
+                       (genderTerm === '' || user.gender.toLowerCase() === genderTerm) &&
+                       (statusFilter === '' || (statusFilter === 'active' && !isExpired) || (statusFilter === 'expired' && isExpired));
+            });
+        }
+
+        // ترتيب المستخدمين
+        function sortUsers(users) {
+            return users.sort((a, b) => {
+                const valA = [a.personalPhoto, a.fullName, a.birthDate, a.gender, a.address, a.idNumber, a.phoneNumber, a.issueDate, a.expiryDate, a.createdAt][sortColumn];
+                const valB = [b.personalPhoto, b.fullName, b.birthDate, b.gender, b.address, b.idNumber, b.phoneNumber, b.issueDate, b.expiryDate, b.createdAt][sortColumn];
+                return sortDirection * (valA > valB ? 1 : -1);
+            });
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection *= -1;
+            } else {
+                sortColumn = column;
+                sortDirection = 1;
+            }
+            fetchUsers(searchInput.value, filterGender.value, currentPage);
+        }
+
+        // تحديث الإحصائيات
+        function updateStats(filteredUsers) {
+            const total = filteredUsers.length;
+            const active = filteredUsers.filter(u => new Date(u.expiryDateRaw) >= new Date()).length;
+            const expired = total - active;
+            totalCards.textContent = total;
+            activeCards.textContent = active;
+            expiredCards.textContent = expired;
+        }
+
+        // إنشاء الترقيم
         function generatePagination(totalItems, currentPage) {
             paginationControls.innerHTML = '';
             const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -502,33 +876,58 @@
                 pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
                 pageItem.querySelector('.page-link').addEventListener('click', (e) => {
                     e.preventDefault();
-                    fetchUsers(searchInput.value, filterSelect.value, i);
+                    currentPage = i;
+                    fetchUsers(searchInput.value, filterGender.value, i);
                 });
                 paginationControls.appendChild(pageItem);
             }
         }
 
-        // Export to CSV
-        exportCsvBtn.addEventListener('click', () => {
-            const csvHeader = "الاسم الكامل,تاريخ الميلاد,الجنس,العنوان,رقم البطاقة,رقم الهاتف,تاريخ الإصدار,تاريخ الانتهاء,تاريخ الإدخال\n";
-            const csvRows = allUsers.map(user => 
-                `${user.fullName},${user.birthDate},${formatGender(user.gender)},${user.address},${user.idNumber},${formatPhoneNumber(user.phoneNumber)},${user.issueDate},${user.expiryDate},${user.createdAt}`
-            ).join('\n');
-            const blob = new Blob([csvHeader + csvRows], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'national_id_data.csv';
-            link.click();
+        // تصدير إلى Excel
+        exportExcelBtn.addEventListener('click', () => {
+            const ws = XLSX.utils.json_to_sheet(allUsers.map(user => ({
+                'الاسم الكامل': user.fullName,
+                'تاريخ الميلاد': user.birthDate,
+                'الجنس': formatGender(user.gender),
+                'العنوان': user.address,
+                'رقم البطاقة': user.idNumber,
+                'رقم الهاتف': formatPhoneNumber(user.phoneNumber),
+                'تاريخ الإصدار': user.issueDate,
+                'تاريخ الانتهاء': user.expiryDate,
+                'تاريخ الإدخال': user.createdAt
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "National_ID_Data");
+            XLSX.writeFile(wb, "national_id_data.xlsx");
         });
 
-        // Refresh Data
-        refreshBtn.addEventListener('click', () => fetchUsers());
+        // طباعة الجدول
+        printBtn.addEventListener('click', () => {
+            const printContent = document.querySelector('.table-responsive').outerHTML;
+            const win = window.open('', '', 'height=500,width=800');
+            win.document.write('<html><head><title>طباعة</title>');
+            win.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">');
+            win.document.write('<style>body { font-family: "Cairo", sans-serif; direction: rtl; } .expired { background-color: #fee2e2; } .active { background-color: #e6ffe6; } img { width: 80px; height: 80px; }</style>');
+            win.document.write('</head><body>');
+            win.document.write(printContent);
+            win.document.write('</body></html>');
+            win.document.close();
+            win.print();
+        });
 
-        // Search and Filter
-        searchInput.addEventListener('input', debounce(() => fetchUsers(searchInput.value, filterSelect.value, 1), 300));
-        filterSelect.addEventListener('change', () => fetchUsers(searchInput.value, filterSelect.value, 1));
+        // تحديث البيانات
+        refreshBtn.addEventListener('click', () => fetchUsers(searchInput.value, filterGender.value, currentPage));
 
-        // Debounce Function
+        // إضافة مستمعي الأحداث
+        saveEditBtn.addEventListener('click', saveEdit);
+        confirmDeleteBtn.addEventListener('click', deleteUser);
+
+        // البحث والتصفية
+        searchInput.addEventListener('input', debounce(() => fetchUsers(searchInput.value, filterGender.value, 1), 100));
+        filterGender.addEventListener('change', () => fetchUsers(searchInput.value, filterGender.value, 1));
+        filterStatus.addEventListener('change', () => fetchUsers(searchInput.value, filterGender.value, 1));
+
+        // دالة التأخير (debounce)
         function debounce(func, wait) {
             let timeout;
             return function (...args) {
@@ -537,7 +936,7 @@
             };
         }
 
-        // Initial Fetch
+        // جلب البيانات عند التحميل
         fetchUsers();
     </script>
 </body>
