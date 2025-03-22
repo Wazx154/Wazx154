@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* الأنماط السابقة بدون تغيير */
         * {
             margin: 0;
             padding: 0;
@@ -49,7 +48,6 @@
             margin-bottom: 40px;
             flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
             background: #f9fafb;
             padding: 15px;
             border-radius: 15px;
@@ -74,11 +72,6 @@
             border-color: #00695c;
             box-shadow: 0 0 10px rgba(0, 105, 92, 0.2);
             outline: none;
-        }
-
-        .form-control::placeholder {
-            font-size: 1rem;
-            color: #6b7280;
         }
 
         .stats-container {
@@ -122,7 +115,6 @@
             background: linear-gradient(90deg, #004d40, #26a69a);
             color: #fff;
             font-weight: 600;
-            cursor: pointer;
         }
 
         .table th, .table td {
@@ -154,19 +146,11 @@
             object-fit: cover;
             border: 3px solid #00695c;
             transition: transform 0.3s ease;
+            display: block;
         }
 
         .table img:hover {
             transform: scale(1.1);
-        }
-
-        .phone-number {
-            font-family: monospace;
-            direction: ltr;
-            display: inline-block;
-            padding: 5px 10px;
-            background: #e6f3f5;
-            border-radius: 5px;
         }
 
         .btn {
@@ -192,14 +176,9 @@
             color: #fff;
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #004d40, #00796b);
-        }
-
-        .btn-success, .btn-home, .btn-refresh, .btn-print {
+        .btn-success {
             background: linear-gradient(135deg, #2e7d32, #4caf50);
             color: #fff;
-            margin-left: 10px;
         }
 
         .btn-danger {
@@ -239,11 +218,6 @@
             color: #00695c;
         }
 
-        .pagination {
-            justify-content: center;
-            margin-top: 20px;
-        }
-
         .pagination .page-link {
             border-radius: 50%;
             width: 40px;
@@ -254,11 +228,6 @@
             margin: 0 5px;
             color: #00695c;
             font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .pagination .page-link:hover {
-            background: #e6f3f5;
         }
 
         .pagination .page-item.active .page-link {
@@ -275,8 +244,8 @@
             background: linear-gradient(90deg, #00695c, #4db6ac);
             color: #fff;
             border-bottom: none;
-            text-align: center;
             border-radius: 15px 15px 0 0;
+            text-align: center;
         }
 
         .modal-body {
@@ -291,11 +260,6 @@
             border: 4px solid #00695c;
             margin: 0 auto 20px;
             display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .modal-body img:hover {
-            transform: scale(1.05);
         }
 
         .modal-body .detail-item {
@@ -307,29 +271,27 @@
             border-radius: 8px;
         }
 
-        .modal-body .detail-item i {
-            margin-left: 10px;
-            color: #4db6ac;
-        }
-
-        .modal-body .detail-item strong {
-            color: #00695c;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
         .delete-modal .modal-header {
             background: linear-gradient(135deg, #c62828, #ef5350);
         }
 
-        .delete-modal .modal-body, .save-modal .modal-body {
+        .delete-modal .modal-body {
             text-align: center;
             font-size: 1.2rem;
             color: #374151;
+            animation: shake 0.5s ease-in-out;
         }
 
         .save-modal .modal-header {
             background: linear-gradient(135deg, #2e7d32, #4caf50);
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
         }
 
         @media (max-width: 768px) {
@@ -340,7 +302,6 @@
             .table td { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #e2e8f0; }
             .table td::before { content: attr(data-label); font-weight: 600; color: #00695c; }
             .search-filter-container { flex-direction: column; }
-            .btn-success, .btn-home, .btn-refresh, .btn-print { margin: 10px auto; display: block; }
             .stats-box { min-width: unset; width: 100%; }
         }
 
@@ -354,17 +315,15 @@
     <div class="container">
         <h1 class="animate__animated animate__fadeIn">عرض معلومات البطاقة الوطنية المغربية</h1>
 
-        <!-- إحصائيات سريعة -->
         <div class="stats-container animate__animated animate__fadeIn">
             <div class="stats-box" style="background: #00796b;">إجمالي البطاقات: <span id="totalCards">0</span></div>
             <div class="stats-box" style="background: #2e7d32;">السارية: <span id="activeCards">0</span></div>
             <div class="stats-box" style="background: #c62828;">المنتهية: <span id="expiredCards">0</span></div>
         </div>
 
-        <!-- فلاتر البحث -->
         <div class="search-filter-container animate__animated animate__fadeIn">
             <div class="search-box">
-                <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة أو الهاتف...">
+                <input type="text" id="search-input" class="form-control" placeholder="ابحث بالاسم أو رقم البطاقة...">
             </div>
             <div class="filter-box">
                 <select id="filter-gender" class="form-select">
@@ -386,16 +345,17 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">الصورة</th>
-                        <th onclick="sortTable(1)">الاسم الكامل <span>↑↓</span></th>
-                        <th onclick="sortTable(2)">تاريخ الميلاد <span>↑↓</span></th>
-                        <th onclick="sortTable(3)">الجنس <span>↑↓</span></th>
-                        <th onclick="sortTable(4)">العنوان <span>↑↓</span></th>
-                        <th onclick="sortTable(5)">رقم البطاقة <span>↑↓</span></th>
-                        <th onclick="sortTable(6)">رقم الهاتف <span>↑↓</span></th>
-                        <th onclick="sortTable(7)">تاريخ الإصدار <span>↑↓</span></th>
-                        <th onclick="sortTable(8)">تاريخ الانتهاء <span>↑↓</span></th>
-                        <th onclick="sortTable(9)">تاريخ الإدخال <span>↑↓</span></th>
+                        <th>الصورة</th>
+                        <th>الاسم الكامل</th>
+                        <th>تاريخ الميلاد</th>
+                        <th>الجنس</th>
+                        <th>حالة الزواج</th>
+                        <th>العنوان</th>
+                        <th>رقم البطاقة</th>
+                        <th>رقم الهاتف</th>
+                        <th>تاريخ الإصدار</th>
+                        <th>تاريخ الانتهاء</th>
+                        <th>تاريخ الإدخال</th>
                         <th>الحالة</th>
                         <th>الإجراءات</th>
                     </tr>
@@ -404,13 +364,13 @@
             </table>
         </div>
 
-        <nav><ul class="pagination" id="pagination-controls"></ul></nav>
+        <nav><ul class="pagination justify-content-center mt-3" id="pagination-controls"></ul></nav>
 
         <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
             <button id="export-excel-btn" class="btn btn-success"><i class="fas fa-download"></i> تصدير Excel</button>
-            <button id="print-btn" class="btn btn-print"><i class="fas fa-print"></i> طباعة</button>
-            <button id="refresh-btn" class="btn btn-refresh"><i class="fas fa-sync"></i> تحديث</button>
-            <button id="home-btn" class="btn btn-home" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> الصفحة الرئيسية</button>
+            <button id="print-btn" class="btn btn-success"><i class="fas fa-print"></i> طباعة</button>
+            <button id="refresh-btn" class="btn btn-success"><i class="fas fa-sync"></i> تحديث</button>
+            <button class="btn btn-success" onclick="window.location.href='index.html'"><i class="fas fa-home"></i> الرئيسية</button>
         </div>
 
         <div id="no-results" class="no-results">لا توجد نتائج مطابقة</div>
@@ -461,6 +421,13 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label>حالة الزواج</label>
+                            <select id="edit-maritalStatus" class="form-select" required>
+                                <option value="married">متزوج</option>
+                                <option value="single">أعزب</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label>العنوان</label>
                             <input type="text" id="edit-address" class="form-control" required>
                         </div>
@@ -470,7 +437,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>رقم البطاقة</label>
-                            <input type="text" id="edit-idNumber" class="form-control" required> <!-- إزالة disabled -->
+                            <input type="text" id="edit-idNumber" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>تاريخ الإصدار</label>
@@ -481,7 +448,7 @@
                             <input type="date" id="edit-expiryDate" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label>الصورة الشخصية (رابط)</label>
+                            <label>الصورة (رابط)</label>
                             <input type="text" id="edit-personalPhoto" class="form-control" required>
                         </div>
                     </div>
@@ -502,31 +469,13 @@
                     <h5 class="modal-title" id="deleteConfirmModalLabel">تأكيد الحذف</h5>
                 </div>
                 <div class="modal-body">
-                    <p>هل أنت متأكد من حذف هذه البطاقة؟</p>
+                    <p><i class="fas fa-exclamation-triangle text-danger me-2"></i>هل أنت متأكد من حذف هذه البطاقة؟</p>
                     <p id="delete-user-name" class="fw-bold text-danger"></p>
                     <small class="text-muted">هذا الإجراء لا يمكن التراجع عنه!</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">حذف</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة تأكيد الحفظ -->
-    <div class="modal fade save-modal" id="saveConfirmModal" tabindex="-1" aria-labelledby="saveConfirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="saveConfirmModalLabel">تم الحفظ بنجاح</h5>
-                </div>
-                <div class="modal-body">
-                    <p>تم حفظ التعديلات على البطاقة بنجاح!</p>
-                    <p id="save-user-name" class="fw-bold text-success"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn"><i class="fas fa-trash-alt"></i> حذف</button>
                 </div>
             </div>
         </div>
@@ -538,7 +487,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // تهيئة Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -552,7 +500,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // العناصر في DOM
         const userList = document.getElementById('user-list');
         const noResults = document.getElementById('no-results');
         const errorMessage = document.getElementById('error-message');
@@ -573,147 +520,112 @@
         const itemsPerPage = 10;
         let currentPage = 1;
         let allUsers = [];
-        let sortColumn = 1;
-        let sortDirection = 1;
         let deleteId = null;
 
-        // دالة لتنظيف المدخلات
         function sanitizeInput(input) {
             const div = document.createElement('div');
             div.textContent = input || '';
             return div.innerHTML;
         }
 
-        // تنسيق التاريخ
         function formatDate(dateString) {
             if (!dateString) return 'غير محدد';
             const date = new Date(dateString);
             return isNaN(date) ? 'غير محدد' : date.toLocaleDateString('ar-MA');
         }
 
-        // تنسيق الجنس
         function formatGender(gender) {
             return gender === 'male' ? 'ذكر' : gender === 'female' ? 'أنثى' : sanitizeInput(gender) || 'غير محدد';
         }
 
-        // تنسيق رقم الهاتف
+        function formatMaritalStatus(status) {
+            return status === 'married' ? 'متزوج' : status === 'single' ? 'أعزب' : sanitizeInput(status) || 'غير محدد';
+        }
+
         function formatPhoneNumber(phone) {
             if (!phone || !phone.match(/^\+212[5-7][0-9]{8}$/)) return sanitizeInput(phone) || 'غير محدد';
             return `${phone.slice(0, 4)}-${phone.slice(4, 7)}-${phone.slice(7)}`;
         }
 
-        // عرض تفاصيل المستخدم
         function showUserDetails(user) {
             const modalBodyContent = document.getElementById('modalBodyContent');
             modalBodyContent.innerHTML = `
                 <img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
-                <div class="detail-item"><i class="fas fa-user"></i><strong>الاسم الكامل:</strong> ${user.fullName}</div>
-                <div class="detail-item"><i class="fas fa-calendar-alt"></i><strong>تاريخ الميلاد:</strong> ${user.birthDate}</div>
-                <div class="detail-item"><i class="fas fa-venus-mars"></i><strong>الجنس:</strong> ${formatGender(user.gender)}</div>
-                <div class="detail-item"><i class="fas fa-map-marker-alt"></i><strong>العنوان:</strong> ${user.address}</div>
-                <div class="detail-item"><i class="fas fa-phone"></i><strong>رقم الهاتف:</strong> <span class="phone-number">${formatPhoneNumber(user.phoneNumber)}</span></div>
-                <div class="detail-item"><i class="fas fa-id-card"></i><strong>رقم البطاقة:</strong> ${user.idNumber}</div>
-                <div class="detail-item"><i class="fas fa-calendar-check"></i><strong>تاريخ الإصدار:</strong> ${user.issueDate}</div>
-                <div class="detail-item"><i class="fas fa-calendar-times"></i><strong>تاريخ الانتهاء:</strong> ${user.expiryDate}</div>
-                <div class="detail-item"><i class="fas fa-clock"></i><strong>تاريخ الإدخال:</strong> ${user.createdAt}</div>
+                <div class="detail-item"><i class="fas fa-user"></i> الاسم الكامل: <strong>${user.fullName}</strong></div>
+                <div class="detail-item"><i class="fas fa-calendar-alt"></i> تاريخ الميلاد: <strong>${user.birthDate}</strong></div>
+                <div class="detail-item"><i class="fas fa-venus-mars"></i> الجنس: <strong>${formatGender(user.gender)}</strong></div>
+                <div class="detail-item"><i class="fas fa-ring"></i> حالة الزواج: <strong>${formatMaritalStatus(user.maritalStatus)}</strong></div>
+                <div class="detail-item"><i class="fas fa-map-marker-alt"></i> العنوان: <strong>${user.address}</strong></div>
+                <div class="detail-item"><i class="fas fa-phone"></i> رقم الهاتف: <strong>${formatPhoneNumber(user.phoneNumber)}</strong></div>
+                <div class="detail-item"><i class="fas fa-id-card"></i> رقم البطاقة: <strong>${user.idNumber}</strong></div>
+                <div class="detail-item"><i class="fas fa-calendar-check"></i> تاريخ الإصدار: <strong>${user.issueDate}</strong></div>
+                <div class="detail-item"><i class="fas fa-calendar-times"></i> تاريخ الانتهاء: <strong>${user.expiryDate}</strong></div>
+                <div class="detail-item"><i class="fas fa-clock"></i> تاريخ الإدخال: <strong>${user.createdAt}</strong></div>
             `;
             const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
             modal.show();
         }
 
-        // تعديل المستخدم
         function editUser(docId) {
             const user = allUsers.find(u => u.docId === docId);
-            if (!user) {
-                alert('لم يتم العثور على المستخدم!');
-                return;
-            }
+            if (!user) return;
             document.getElementById('edit-doc-id').value = docId;
             document.getElementById('edit-fullName').value = user.fullName;
-            document.getElementById('edit-birthDate').value = user.birthDateRaw || '';
-            document.getElementById('edit-gender').value = user.gender || 'male';
+            document.getElementById('edit-birthDate').value = user.birthDateRaw;
+            document.getElementById('edit-gender').value = user.gender;
+            document.getElementById('edit-maritalStatus').value = user.maritalStatus;
             document.getElementById('edit-address').value = user.address;
             document.getElementById('edit-phoneNumber').value = user.phoneNumber;
             document.getElementById('edit-idNumber').value = user.idNumber;
-            document.getElementById('edit-issueDate').value = user.issueDateRaw || '';
-            document.getElementById('edit-expiryDate').value = user.expiryDateRaw || '';
+            document.getElementById('edit-issueDate').value = user.issueDateRaw;
+            document.getElementById('edit-expiryDate').value = user.expiryDateRaw;
             document.getElementById('edit-personalPhoto').value = user.personalPhoto;
             const modal = new bootstrap.Modal(document.getElementById('editModal'));
             modal.show();
         }
 
-        // حفظ التعديلات
         async function saveEdit() {
             const docId = document.getElementById('edit-doc-id').value;
-            const fullName = sanitizeInput(document.getElementById('edit-fullName').value);
-            const birthDate = document.getElementById('edit-birthDate').value;
-            const gender = document.getElementById('edit-gender').value;
-            const address = sanitizeInput(document.getElementById('edit-address').value);
-            const phoneNumber = sanitizeInput(document.getElementById('edit-phoneNumber').value);
-            const idNumber = sanitizeInput(document.getElementById('edit-idNumber').value);
-            const issueDate = document.getElementById('edit-issueDate').value;
-            const expiryDate = document.getElementById('edit-expiryDate').value;
-            const personalPhoto = sanitizeInput(document.getElementById('edit-personalPhoto').value);
+            const updatedData = {
+                fullName: sanitizeInput(document.getElementById('edit-fullName').value),
+                birthDate: document.getElementById('edit-birthDate').value,
+                gender: document.getElementById('edit-gender').value,
+                maritalStatus: document.getElementById('edit-maritalStatus').value,
+                address: sanitizeInput(document.getElementById('edit-address').value),
+                phoneNumber: sanitizeInput(document.getElementById('edit-phoneNumber').value),
+                idNumber: sanitizeInput(document.getElementById('edit-idNumber').value),
+                issueDate: document.getElementById('edit-issueDate').value,
+                expiryDate: document.getElementById('edit-expiryDate').value,
+                personalPhoto: sanitizeInput(document.getElementById('edit-personalPhoto').value),
+                updatedAt: new Date().toISOString()
+            };
 
-            // التحقق من الحقول
-            if (!docId || !fullName || !birthDate || !gender || !address || !phoneNumber || !idNumber || !issueDate || !expiryDate || !personalPhoto) {
-                alert('يرجى ملء جميع الحقول المطلوبة!');
+            if (Object.values(updatedData).some(val => !val)) {
+                alert('يرجى ملء جميع الحقول!');
                 return;
             }
 
             try {
-                // التحقق مما إذا كان رقم البطاقة الجديد موجود مسبقًا (في حال تغييره)
                 const oldUser = allUsers.find(u => u.docId === docId);
-                if (oldUser.idNumber !== idNumber) {
-                    const idCheck = await getDoc(doc(db, 'national_id_data', idNumber));
+                if (oldUser.idNumber !== updatedData.idNumber) {
+                    const idCheck = await getDoc(doc(db, 'national_id_data', updatedData.idNumber));
                     if (idCheck.exists()) {
-                        alert('رقم البطاقة الجديد موجود مسبقًا! يرجى اختيار رقم آخر.');
+                        alert('رقم البطاقة موجود مسبقًا!');
                         return;
                     }
-                    // حذف المستند القديم وإنشاء مستند جديد برقم البطاقة الجديد
                     await deleteDoc(doc(db, 'national_id_data', docId));
-                    await setDoc(doc(db, 'national_id_data', idNumber), {
-                        fullName,
-                        birthDate,
-                        gender,
-                        address,
-                        phoneNumber,
-                        idNumber,
-                        issueDate,
-                        expiryDate,
-                        personalPhoto,
-                        createdAt: oldUser.createdAtRaw || new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    });
+                    await setDoc(doc(db, 'national_id_data', updatedData.idNumber), { ...updatedData, createdAt: oldUser.createdAtRaw });
                 } else {
-                    // تحديث المستند الحالي إذا لم يتغير رقم البطاقة
-                    await updateDoc(doc(db, 'national_id_data', docId), {
-                        fullName,
-                        birthDate,
-                        gender,
-                        address,
-                        phoneNumber,
-                        idNumber,
-                        issueDate,
-                        expiryDate,
-                        personalPhoto,
-                        updatedAt: new Date().toISOString()
-                    });
+                    await updateDoc(doc(db, 'national_id_data', docId), updatedData);
                 }
-
                 bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
-                document.getElementById('save-user-name').textContent = fullName;
-                const saveModal = new bootstrap.Modal(document.getElementById('saveConfirmModal'));
-                saveModal.show();
-
-                fetchUsers(); // تحديث البيانات
+                fetchUsers();
             } catch (error) {
-                console.error('خطأ في حفظ التعديلات:', error);
-                alert('حدث خطأ أثناء حفظ التعديلات: ' + error.message);
+                console.error('خطأ في الحفظ:', error);
+                alert('حدث خطأ أثناء الحفظ!');
             }
         }
 
-        // تأكيد الحذف
         function confirmDeleteUser(docId) {
             const user = allUsers.find(u => u.docId === docId);
             if (!user) return;
@@ -723,21 +635,20 @@
             modal.show();
         }
 
-        // حذف المستخدم
         async function deleteUser() {
             if (!deleteId) return;
             try {
                 await deleteDoc(doc(db, 'national_id_data', deleteId));
                 bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
-                deleteId = null;
-                fetchUsers(); // تحديث البيانات بعد الحذف
+                fetchUsers();
             } catch (error) {
                 console.error('خطأ في الحذف:', error);
-                alert('حدث خطأ أثناء الحذف: ' + error.message);
+                alert('حدث خطأ أثناء الحذف!');
+            } finally {
+                deleteId = null;
             }
         }
 
-        // جلب البيانات
         async function fetchUsers(searchQuery = '', genderFilter = '', page = 1) {
             loadingSpinner.style.display = 'block';
             errorMessage.style.display = 'none';
@@ -757,6 +668,7 @@
                         birthDate: formatDate(data.birthDate),
                         birthDateRaw: data.birthDate || '',
                         gender: data.gender || 'غير محدد',
+                        maritalStatus: data.maritalStatus || 'غير محدد',
                         address: sanitizeInput(data.address) || 'غير محدد',
                         idNumber: sanitizeInput(data.idNumber) || 'غير محدد',
                         phoneNumber: sanitizeInput(data.phoneNumber) || 'غير محدد',
@@ -764,34 +676,45 @@
                         issueDateRaw: data.issueDate || '',
                         expiryDate: formatDate(data.expiryDate),
                         expiryDateRaw: data.expiryDate || '',
-                        createdAt: data.createdAt ? new Date(data.createdAt).toLocaleString('ar-MA') : 'غير محدد',
-                        createdAtRaw: data.createdAt || ''
+                        createdAt: formatDate(data.createdAt),
+                        createdAtRaw: data.createdAt || new Date().toISOString()
                     });
                 });
 
-                const filteredUsers = filterUsers(searchQuery, genderFilter);
-                updateStats(filteredUsers);
+                const filteredUsers = allUsers.filter(user => {
+                    const isExpired = new Date(user.expiryDateRaw) < new Date();
+                    return (
+                        (user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         user.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         user.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())) &&
+                        (!genderFilter || user.gender === genderFilter) &&
+                        (!filterStatus.value || (filterStatus.value === 'active' && !isExpired) || (filterStatus.value === 'expired' && isExpired))
+                    );
+                });
 
-                const sortedUsers = sortUsers(filteredUsers);
+                totalCards.textContent = filteredUsers.length;
+                activeCards.textContent = filteredUsers.filter(u => new Date(u.expiryDateRaw) >= new Date()).length;
+                expiredCards.textContent = filteredUsers.filter(u => new Date(u.expiryDateRaw) < new Date()).length;
+
                 const startIdx = (page - 1) * itemsPerPage;
-                const paginatedUsers = sortedUsers.slice(startIdx, startIdx + itemsPerPage);
+                const paginatedUsers = filteredUsers.slice(startIdx, startIdx + itemsPerPage);
 
                 if (paginatedUsers.length === 0) {
                     noResults.style.display = 'block';
                 } else {
-                    paginatedUsers.forEach((user, index) => {
+                    paginatedUsers.forEach(user => {
                         const isExpired = new Date(user.expiryDateRaw) < new Date();
                         const row = document.createElement('tr');
-                        row.classList.add('animate__animated', 'animate__fadeInUp', isExpired ? 'expired' : 'active');
-                        row.style.animationDelay = `${index * 0.05}s`;
+                        row.classList.add(isExpired ? 'expired' : 'active');
                         row.innerHTML = `
                             <td data-label="الصورة"><img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
                             <td data-label="الاسم الكامل">${user.fullName}</td>
                             <td data-label="تاريخ الميلاد">${user.birthDate}</td>
                             <td data-label="الجنس">${formatGender(user.gender)}</td>
+                            <td data-label="حالة الزواج">${formatMaritalStatus(user.maritalStatus)}</td>
                             <td data-label="العنوان">${user.address}</td>
                             <td data-label="رقم البطاقة">${user.idNumber}</td>
-                            <td data-label="رقم الهاتف"><span class="phone-number">${formatPhoneNumber(user.phoneNumber)}</span></td>
+                            <td data-label="رقم الهاتف">${formatPhoneNumber(user.phoneNumber)}</td>
                             <td data-label="تاريخ الإصدار">${user.issueDate}</td>
                             <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
                             <td data-label="تاريخ الإدخال">${user.createdAt}</td>
@@ -799,7 +722,7 @@
                             <td data-label="الإجراءات">
                                 <button class="btn btn-sm btn-primary view-details"><i class="fas fa-eye"></i></button>
                                 <button class="btn btn-sm btn-success edit-user"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-sm btn-danger delete-user"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-sm btn-danger delete-user"><i class="fas fa-trash-alt"></i></button>
                             </td>
                         `;
                         row.querySelector('.view-details').addEventListener('click', () => showUserDetails(user));
@@ -809,7 +732,7 @@
                     });
                 }
 
-                generatePagination(sortedUsers.length, page);
+                generatePagination(filteredUsers.length, page);
             } catch (error) {
                 console.error('خطأ في جلب البيانات:', error);
                 errorMessage.style.display = 'block';
@@ -818,52 +741,6 @@
             }
         }
 
-        // تصفية المستخدمين
-        function filterUsers(searchQuery, genderFilter) {
-            const searchTerm = sanitizeInput(searchQuery).toLowerCase();
-            const genderTerm = genderFilter.toLowerCase();
-            const statusFilter = filterStatus.value;
-
-            return allUsers.filter(user => {
-                const isExpired = new Date(user.expiryDateRaw) < new Date();
-                return (user.fullName.toLowerCase().includes(searchTerm) ||
-                        user.idNumber.toLowerCase().includes(searchTerm) ||
-                        user.phoneNumber.toLowerCase().includes(searchTerm)) &&
-                       (genderTerm === '' || user.gender.toLowerCase() === genderTerm) &&
-                       (statusFilter === '' || (statusFilter === 'active' && !isExpired) || (statusFilter === 'expired' && isExpired));
-            });
-        }
-
-        // ترتيب المستخدمين
-        function sortUsers(users) {
-            return users.sort((a, b) => {
-                const valA = [a.personalPhoto, a.fullName, a.birthDate, a.gender, a.address, a.idNumber, a.phoneNumber, a.issueDate, a.expiryDate, a.createdAt][sortColumn];
-                const valB = [b.personalPhoto, b.fullName, b.birthDate, b.gender, b.address, b.idNumber, b.phoneNumber, b.issueDate, b.expiryDate, b.createdAt][sortColumn];
-                return sortDirection * (valA > valB ? 1 : -1);
-            });
-        }
-
-        function sortTable(column) {
-            if (sortColumn === column) {
-                sortDirection *= -1;
-            } else {
-                sortColumn = column;
-                sortDirection = 1;
-            }
-            fetchUsers(searchInput.value, filterGender.value, currentPage);
-        }
-
-        // تحديث الإحصائيات
-        function updateStats(filteredUsers) {
-            const total = filteredUsers.length;
-            const active = filteredUsers.filter(u => new Date(u.expiryDateRaw) >= new Date()).length;
-            const expired = total - active;
-            totalCards.textContent = total;
-            activeCards.textContent = active;
-            expiredCards.textContent = expired;
-        }
-
-        // إنشاء الترقيم
         function generatePagination(totalItems, currentPage) {
             paginationControls.innerHTML = '';
             const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -874,7 +751,7 @@
                 pageItem.classList.add('page-item');
                 if (i === currentPage) pageItem.classList.add('active');
                 pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                pageItem.querySelector('.page-link').addEventListener('click', (e) => {
+                pageItem.querySelector('.page-link').addEventListener('click', e => {
                     e.preventDefault();
                     currentPage = i;
                     fetchUsers(searchInput.value, filterGender.value, i);
@@ -883,12 +760,12 @@
             }
         }
 
-        // تصدير إلى Excel
         exportExcelBtn.addEventListener('click', () => {
             const ws = XLSX.utils.json_to_sheet(allUsers.map(user => ({
                 'الاسم الكامل': user.fullName,
                 'تاريخ الميلاد': user.birthDate,
                 'الجنس': formatGender(user.gender),
+                'حالة الزواج': formatMaritalStatus(user.maritalStatus),
                 'العنوان': user.address,
                 'رقم البطاقة': user.idNumber,
                 'رقم الهاتف': formatPhoneNumber(user.phoneNumber),
@@ -901,7 +778,6 @@
             XLSX.writeFile(wb, "national_id_data.xlsx");
         });
 
-        // طباعة الجدول
         printBtn.addEventListener('click', () => {
             const printContent = document.querySelector('.table-responsive').outerHTML;
             const win = window.open('', '', 'height=500,width=800');
@@ -915,19 +791,14 @@
             win.print();
         });
 
-        // تحديث البيانات
         refreshBtn.addEventListener('click', () => fetchUsers(searchInput.value, filterGender.value, currentPage));
-
-        // إضافة مستمعي الأحداث
         saveEditBtn.addEventListener('click', saveEdit);
         confirmDeleteBtn.addEventListener('click', deleteUser);
 
-        // البحث والتصفية
-        searchInput.addEventListener('input', debounce(() => fetchUsers(searchInput.value, filterGender.value, 1), 100));
+        searchInput.addEventListener('input', debounce(() => fetchUsers(searchInput.value, filterGender.value, 1), 300));
         filterGender.addEventListener('change', () => fetchUsers(searchInput.value, filterGender.value, 1));
         filterStatus.addEventListener('change', () => fetchUsers(searchInput.value, filterGender.value, 1));
 
-        // دالة التأخير (debounce)
         function debounce(func, wait) {
             let timeout;
             return function (...args) {
@@ -936,7 +807,6 @@
             };
         }
 
-        // جلب البيانات عند التحميل
         fetchUsers();
     </script>
 </body>
