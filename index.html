@@ -361,6 +361,18 @@
             </div>
 
             <div class="form-group">
+                <label for="marital-status" class="form-label"><i class="fas fa-ring"></i> حالة الزواج</label>
+                <select class="form-select" id="marital-status" required>
+                    <option value="" disabled selected>اختر حالة الزواج</option>
+                    <option value="single">أعزب/عزباء</option>
+                    <option value="married">متزوج/متزوجة</option>
+                    <option value="divorced">مطلق/مطلقة</option>
+                    <option value="widowed">أرمل/أرملة</option>
+                </select>
+                <div class="error-message" id="marital-status-error">يرجى اختيار حالة الزواج</div>
+            </div>
+
+            <div class="form-group">
                 <label for="personal-photo" class="form-label"><i class="fas fa-camera"></i> الصورة الشخصية (اختياري)</label>
                 <div class="file-input">
                     <input type="file" id="personal-photo" accept="image/*">
@@ -479,7 +491,7 @@
             e.target.value = value;
         });
 
-        // Image preview
+                // Image preview
         document.getElementById('personal-photo').addEventListener('change', (event) => {
             const file = event.target.files[0];
             const previewImage = document.getElementById('preview-image');
@@ -508,24 +520,24 @@
                 await signOut(auth);
                 window.location.href = 'login.html';
             } catch (error) {
-              console.error('خطأ أثناء تسجيل الخروج:', error);
-              alert('فشل تسجيل الخروج. يرجى المحاولة مرة أخرى.');
+                console.error('خطأ أثناء تسجيل الخروج:', error);
+                alert('فشل تسجيل الخروج. يرجى المحاولة مرة أخرى.');
             }
-            });
-            
-            // Form submission handler
-            document.getElementById('national-id-form').addEventListener('submit', async (event) => {
-              event.preventDefault();
-              
-              // Reset error messages and styles
-              document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-              document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
-              
-              // Show loading overlay
-              const loadingOverlay = document.getElementById('loading-overlay');
-              loadingOverlay.style.display = 'flex';
-              
-              try {
+        });
+
+        // Form submission handler
+        document.getElementById('national-id-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Reset error messages and styles
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
+
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex';
+
+            try {
                 // Get form values and sanitize them
                 const fullName = sanitizeInput(document.getElementById('full-name').value.trim());
                 const birthDate = document.getElementById('birth-date').value;
@@ -535,101 +547,109 @@
                 const idNumber = sanitizeInput(document.getElementById('id-number').value.trim());
                 const issueDate = document.getElementById('issue-date').value;
                 const expiryDate = document.getElementById('expiry-date').value;
+                const maritalStatus = document.getElementById('marital-status').value;
                 const personalPhoto = document.getElementById('personal-photo').files[0];
-                
+
                 // Validate form inputs
                 let hasError = false;
-                
+
                 if (!fullName) {
-                  showError('full-name');
-                  hasError = true;
+                    showError('full-name');
+                    hasError = true;
                 }
-                
+
                 if (!birthDate) {
-                  showError('birth-date');
-                  hasError = true;
+                    showError('birth-date');
+                    hasError = true;
                 }
-                
+
                 if (!gender) {
-                  showError('gender');
-                  hasError = true;
+                    showError('gender');
+                    hasError = true;
                 }
-                
+
                 if (!address) {
-                  showError('address');
-                  hasError = true;
+                    showError('address');
+                    hasError = true;
                 }
-                
+
                 if (!/^\+212[5-7][0-9]{8}$/.test(phoneNumber)) {
-                  showError('phone-number');
-                  hasError = true;
+                    showError('phone-number');
+                    hasError = true;
                 }
-                
+
                 if (!idNumber) {
-                  showError('id-number');
-                  hasError = true;
+                    showError('id-number');
+                    hasError = true;
                 }
-                
+
                 if (!issueDate) {
-                  showError('issue-date');
-                  hasError = true;
+                    showError('issue-date');
+                    hasError = true;
                 }
-                
+
                 if (!expiryDate || new Date(expiryDate) <= new Date(issueDate)) {
-                  showError('expiry-date');
-                  hasError = true;
+                    showError('expiry-date');
+                    hasError = true;
                 }
-                
+
+                if (!maritalStatus) {
+                    showError('marital-status');
+                    hasError = true;
+                }
+
                 if (hasError) {
-                  return; // Stop submission if there are errors
+                    return; // Stop submission if there are errors
                 }
-                
+
                 // Upload the image to Cloudinary if selected
                 let personalPhotoURL = null;
                 if (personalPhoto) {
-                  personalPhotoURL = await uploadToCloudinary(personalPhoto);
+                    personalPhotoURL = await uploadToCloudinary(personalPhoto);
                 }
-                
+
                 // Add data to Firestore
                 await addDoc(collection(db, 'national_id_data'), {
-                  fullName,
-                  birthDate,
-                  gender,
-                  address,
-                  phoneNumber,
-                  idNumber,
-                  issueDate,
-                  expiryDate,
-                  personalPhoto: personalPhotoURL,
-                  createdAt: serverTimestamp()
+                    fullName,
+                    birthDate,
+                    gender,
+                    address,
+                    phoneNumber,
+                    idNumber,
+                    issueDate,
+                    expiryDate,
+                    maritalStatus,
+                    personalPhoto: personalPhotoURL,
+                    createdAt: serverTimestamp()
                 });
-                
+
                 // Show success message
                 const successMessage = document.getElementById('success-message');
                 successMessage.classList.add('show');
                 setTimeout(() => {
-                  successMessage.classList.remove('show');
+                    successMessage.classList.remove('show');
                 }, 3000);
-                
+
                 // Reset the form
                 document.getElementById('national-id-form').reset();
                 document.getElementById('preview-image').style.display = 'none';
                 document.getElementById('upload-confirmation').style.display = 'none';
-              } catch (error) {
+            } catch (error) {
                 console.error('خطأ أثناء الإرسال:', error);
                 alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
-              } finally {
+            } finally {
                 // Hide loading overlay
                 loadingOverlay.style.display = 'none';
-              }
-            });
-            
-            // Function to display error messages
-            function showError(fieldId) {
-              const errorElement = document.getElementById(`${fieldId}-error`);
-              errorElement.style.display = 'block';
-              document.getElementById(fieldId).classList.add('is-invalid');
             }
-            </script> 
-            </body>
-            </html>
+        });
+
+        // Function to display error messages
+        function showError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            errorElement.style.display = 'block';
+            document.getElementById(fieldId).classList.add('is-invalid');
+        }
+    </script>
+</body>
+
+</html>
