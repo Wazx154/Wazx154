@@ -127,6 +127,12 @@
             text-overflow: ellipsis;
         }
 
+        .table td.phone-number {
+            text-align: left; /* محاذاة رقم الهاتف إلى اليسار */
+            direction: ltr; /* جعل الاتجاه من اليسار إلى اليمين لرقم الهاتف */
+            font-family: monospace; /* استخدام خط أحادي المسافة لتحسين الوضوح */
+        }
+
         .table tbody tr {
             transition: all 0.2s ease;
         }
@@ -269,6 +275,13 @@
             padding: 10px;
             background: #f9fafb;
             border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal-body .detail-item .phone-number {
+            direction: ltr; /* عرض رقم الهاتف من اليسار إلى اليمين */
+            font-family: monospace; /* خط أحادي للوضوح */
         }
 
         .delete-modal .modal-header {
@@ -300,6 +313,7 @@
             .table tbody, .table tr { display: block; }
             .table tr { margin-bottom: 15px; padding: 10px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); }
             .table td { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #e2e8f0; }
+            .table td.phone-number { direction: ltr; justify-content: flex-start; }
             .table td::before { content: attr(data-label); font-weight: 600; color: #00695c; }
             .search-filter-container { flex-direction: column; }
             .stats-box { min-width: unset; width: 100%; }
@@ -435,7 +449,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>رقم الهاتف</label>
-                            <input type="text" id="edit-phoneNumber" class="form-control" required>
+                            <input type="text" id="edit-phoneNumber" class="form-control" required dir="ltr">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>رقم البطاقة</label>
@@ -532,7 +546,7 @@
 
         function formatDate(dateInput) {
             if (!dateInput) return 'غير محدد';
-            const date = dateInput.toDate ? dateInput.toDate() : new Date(dateInput); // دعم Timestamp من Firestore
+            const date = dateInput.toDate ? dateInput.toDate() : new Date(dateInput);
             return isNaN(date) ? 'غير محدد' : date.toLocaleDateString('ar-MA', {
                 year: 'numeric',
                 month: 'long',
@@ -555,24 +569,28 @@
         }
 
         function formatPhoneNumber(phone) {
-            if (!phone || !phone.match(/^\+212[5-7][0-9]{8}$/)) return sanitizeInput(phone) || 'غير محدد';
-            return `${phone.slice(0, 4)}-${phone.slice(4, 7)}-${phone.slice(7)}`;
+            if (!phone) return 'غير محدد';
+            const cleanPhone = phone.replace(/[^0-9+]/g, ''); // إزالة أي أحرف غير ضرورية
+            if (cleanPhone.match(/^\+212[5-7][0-9]{8}$/)) {
+                return `${cleanPhone.slice(0, 4)} ${cleanPhone.slice(4, 7)} ${cleanPhone.slice(7)}`; // تنسيق أفضل مع مسافات
+            }
+            return sanitizeInput(phone) || 'غير محدد';
         }
 
         function showUserDetails(user) {
             const modalBodyContent = document.getElementById('modalBodyContent');
             modalBodyContent.innerHTML = `
                 <img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/150'">
-                <div class="detail-item"><i class="fas fa-user"></i> الاسم الكامل: <strong>${user.fullName}</strong></div>
-                <div class="detail-item"><i class="fas fa-calendar-alt"></i> تاريخ الميلاد: <strong>${user.birthDate}</strong></div>
-                <div class="detail-item"><i class="fas fa-venus-mars"></i> الجنس: <strong>${formatGender(user.gender)}</strong></div>
-                <div class="detail-item"><i class="fas fa-ring"></i> حالة الزواج: <strong>${formatMaritalStatus(user.maritalStatus)}</strong></div>
-                <div class="detail-item"><i class="fas fa-map-marker-alt"></i> العنوان: <strong>${user.address}</strong></div>
-                <div class="detail-item"><i class="fas fa-phone"></i> رقم الهاتف: <strong>${formatPhoneNumber(user.phoneNumber)}</strong></div>
-                <div class="detail-item"><i class="fas fa-id-card"></i> رقم البطاقة: <strong>${user.idNumber}</strong></div>
-                <div class="detail-item"><i class="fas fa-calendar-check"></i> تاريخ الإصدار: <strong>${user.issueDate}</strong></div>
-                <div class="detail-item"><i class="fas fa-calendar-times"></i> تاريخ الانتهاء: <strong>${user.expiryDate}</strong></div>
-                <div class="detail-item"><i class="fas fa-clock"></i> تاريخ الإدخال: <strong>${user.createdAt}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-user"></i> الاسم الكامل:</span> <strong>${user.fullName}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-calendar-alt"></i> تاريخ الميلاد:</span> <strong>${user.birthDate}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-venus-mars"></i> الجنس:</span> <strong>${formatGender(user.gender)}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-ring"></i> حالة الزواج:</span> <strong>${formatMaritalStatus(user.maritalStatus)}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-map-marker-alt"></i> العنوان:</span> <strong>${user.address}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-phone"></i> رقم الهاتف:</span> <strong class="phone-number">${formatPhoneNumber(user.phoneNumber)}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-id-card"></i> رقم البطاقة:</span> <strong>${user.idNumber}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-calendar-check"></i> تاريخ الإصدار:</span> <strong>${user.issueDate}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-calendar-times"></i> تاريخ الانتهاء:</span> <strong>${user.expiryDate}</strong></div>
+                <div class="detail-item"><span><i class="fas fa-clock"></i> تاريخ الإدخال:</span> <strong>${user.createdAt}</strong></div>
             `;
             const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
             modal.show();
@@ -609,7 +627,7 @@
                 issueDate: document.getElementById('edit-issueDate').value,
                 expiryDate: document.getElementById('edit-expiryDate').value,
                 personalPhoto: sanitizeInput(document.getElementById('edit-personalPhoto').value),
-                updatedAt: serverTimestamp() // استخدام serverTimestamp للحفاظ على وقت التحديث
+                updatedAt: serverTimestamp()
             };
 
             if (Object.values(updatedData).some(val => !val)) {
@@ -691,8 +709,8 @@
                         issueDateRaw: data.issueDate || '',
                         expiryDate: formatDate(data.expiryDate),
                         expiryDateRaw: data.expiryDate || '',
-                        createdAt: formatDate(data.createdAt || new Date()), // ضمان وجود تاريخ افتراضي
-                        createdAtRaw: data.createdAt || serverTimestamp() // تخزين الخام كـ Timestamp
+                        createdAt: formatDate(data.createdAt || new Date()),
+                        createdAtRaw: data.createdAt || serverTimestamp()
                     });
                 });
 
@@ -729,7 +747,7 @@
                             <td data-label="حالة الزواج">${formatMaritalStatus(user.maritalStatus)}</td>
                             <td data-label="العنوان">${user.address}</td>
                             <td data-label="رقم البطاقة">${user.idNumber}</td>
-                            <td data-label="رقم الهاتف">${formatPhoneNumber(user.phoneNumber)}</td>
+                            <td data-label="رقم الهاتف" class="phone-number">${formatPhoneNumber(user.phoneNumber)}</td>
                             <td data-label="تاريخ الإصدار">${user.issueDate}</td>
                             <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
                             <td data-label="تاريخ الإدخال">${user.createdAt}</td>
@@ -798,7 +816,7 @@
             const win = window.open('', '', 'height=500,width=800');
             win.document.write('<html><head><title>طباعة</title>');
             win.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">');
-            win.document.write('<style>body { font-family: "Cairo", sans-serif; direction: rtl; } .expired { background-color: #fee2e2; } .active { background-color: #e6ffe6; } img { width: 80px; height: 80px; }</style>');
+            win.document.write('<style>body { font-family: "Cairo", sans-serif; direction: rtl; } .expired { background-color: #fee2e2; } .active { background-color: #e6ffe6; } img { width: 80px; height: 80px; } .phone-number { direction: ltr; font-family: monospace; text-align: left; }</style>');
             win.document.write('</head><body>');
             win.document.write(printContent);
             win.document.write('</body></html>');
