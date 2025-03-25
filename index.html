@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدخال معلومات البطاقة الوطنية المغربية</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -94,16 +90,6 @@
         #phone-number {
             direction: ltr;
             text-align: left;
-            padding-left: 40px;
-        }
-
-        .input-icon {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-size: 1.2rem;
         }
 
         .file-input {
@@ -193,12 +179,10 @@
             background: linear-gradient(135deg, #dc2626, #ef4444);
         }
 
-        .success-message {
+        .message {
             display: none;
             text-align: center;
             padding: 20px;
-            background: #e0f2e9;
-            color: #004d40;
             border-radius: 12px;
             margin-top: 20px;
             font-size: 1.2rem;
@@ -211,7 +195,17 @@
             width: 450px;
         }
 
-        .success-message.show {
+        .success-message {
+            background: #e0f2e9;
+            color: #004d40;
+        }
+
+        .error-message-box {
+            background: #ffebee;
+            color: #b71c1c;
+        }
+
+        .message.show {
             display: block;
             animation: fadeInDown 0.5s ease;
         }
@@ -247,45 +241,21 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 20px;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-            .container {
-                padding: 25px;
-            }
-            .btn {
-                font-size: 1rem;
-                padding: 10px 20px;
-            }
-            .form-control,
-            .form-select {
-                font-size: 1rem;
-            }
+            body { padding: 20px; }
+            h1 { font-size: 2rem; }
+            .container { padding: 25px; }
+            .btn { font-size: 1rem; padding: 10px 20px; }
+            .form-control, .form-select { font-size: 1rem; }
         }
     </style>
 </head>
@@ -380,7 +350,9 @@
             </div>
         </form>
 
-        <div id="success-message" class="success-message">تم إرسال البيانات بنجاح! 🎉</div>
+        <div id="success-message" class="message success-message">تم إرسال البيانات بنجاح! 🎉</div>
+        <div id="duplicate-id-message" class="message error-message-box">رقم البطاقة الوطنية موجود بالفعل !</div>
+        <div id="duplicate-phone-message" class="message error-message-box">رقم الهاتف موجود بالفعل !</div>
     </div>
 
     <div id="loading-overlay" class="loading-overlay">
@@ -389,7 +361,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -416,11 +387,20 @@
         const cloudName = 'dgbsnye9w';
         const uploadPreset = 'my_upload_preset';
 
+        // Elements
+        const form = document.getElementById('national-id-form');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const successMessage = document.getElementById('success-message');
+        const duplicateIdMessage = document.getElementById('duplicate-id-message');
+        const duplicatePhoneMessage = document.getElementById('duplicate-phone-message');
+        const phoneInput = document.getElementById('phone-number');
+        const photoInput = document.getElementById('personal-photo');
+        const previewImage = document.getElementById('preview-image');
+        const uploadConfirmation = document.getElementById('upload-confirmation');
+
         // Authentication state listener
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            }
+            if (!user) window.location.href = 'login.html';
         });
 
         // Utility Functions
@@ -430,78 +410,73 @@
             return div.innerHTML;
         };
 
-        const showError = (fieldId, message = null) => {
-            const errorElement = document.getElementById(`${fieldId}-error`);
-            if (message) errorElement.textContent = message;
-            errorElement.style.display = 'block';
+        const showError = (fieldId) => {
+            document.getElementById(`${fieldId}-error`).style.display = 'block';
             document.getElementById(fieldId).classList.add('is-invalid');
         };
 
-        const resetErrors = () => {
-            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
+        const showMessage = (element) => {
+            element.classList.add('show');
+            setTimeout(() => element.classList.remove('show'), 3000);
         };
 
-        const showSuccessMessage = () => {
-            const successMessage = document.getElementById('success-message');
-            successMessage.classList.add('show');
-            setTimeout(() => successMessage.classList.remove('show'), 3000);
-        };
-
-        // Cloudinary Image Upload
+        // Cloudinary Upload
         const uploadToCloudinary = async (file) => {
             if (!file) return null;
-
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', uploadPreset);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) throw new Error('فشل رفع الصورة');
-            const data = await response.json();
-            return data.secure_url;
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) throw new Error('فشل رفع الصورة');
+                const data = await response.json();
+                return data.secure_url;
+            } catch (error) {
+                console.error("Cloudinary Upload Error:", error);
+                throw error;
+            }
         };
 
-        // Check if ID number already exists in Firestore
-        const checkExistingUser = async (idNumber) => {
+        // Check if ID number exists
+        const checkExistingId = async (idNumber) => {
             const q = query(collection(db, 'national_id_data'), where('idNumber', '==', idNumber));
             const querySnapshot = await getDocs(q);
-            return !querySnapshot.empty; // Returns true if user exists
+            return !querySnapshot.empty;
         };
 
-        // Phone number formatting
-        document.getElementById('phone-number').addEventListener('input', (e) => {
+        // Check if phone number exists
+        const checkExistingPhone = async (phoneNumber) => {
+            const q = query(collection(db, 'national_id_data'), where('phoneNumber', '==', phoneNumber));
+            const querySnapshot = await getDocs(q);
+            return !querySnapshot.empty;
+        };
+
+        // Event Listeners
+        phoneInput.addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
             value = value.slice(0, 9);
             e.target.value = value;
         });
 
-        // Image preview
-        document.getElementById('personal-photo').addEventListener('change', (event) => {
+        photoInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
-            const previewImage = document.getElementById('preview-image');
-            const confirmation = document.getElementById('upload-confirmation');
-
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     previewImage.src = e.target.result;
                     previewImage.style.display = 'block';
-                    confirmation.style.display = 'block';
+                    uploadConfirmation.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
             } else {
-                previewImage.src = '#';
                 previewImage.style.display = 'none';
-                confirmation.style.display = 'none';
+                uploadConfirmation.style.display = 'none';
             }
         });
 
-        // Logout functionality
         document.getElementById('logout-button').addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -512,105 +487,74 @@
             }
         });
 
-        // Form submission handler
-        document.getElementById('national-id-form').addEventListener('submit', async (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            resetErrors();
-            const loadingOverlay = document.getElementById('loading-overlay');
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
+
             loadingOverlay.style.display = 'flex';
 
             try {
-                // Get and sanitize form values
-                const fullName = sanitizeInput(document.getElementById('full-name').value.trim());
-                const birthDate = document.getElementById('birth-date').value;
-                const gender = document.getElementById('gender').value;
-                const address = sanitizeInput(document.getElementById('address').value.trim());
-                const phoneNumber = '+212' + document.getElementById('phone-number').value;
-                const idNumber = sanitizeInput(document.getElementById('id-number').value.trim());
-                const issueDate = document.getElementById('issue-date').value;
-                const expiryDate = document.getElementById('expiry-date').value;
-                const maritalStatus = document.getElementById('marital-status').value;
-                const personalPhoto = document.getElementById('personal-photo').files[0];
+                // Get and sanitize form data
+                const formData = {
+                    fullName: sanitizeInput(document.getElementById('full-name').value.trim()),
+                    birthDate: document.getElementById('birth-date').value,
+                    gender: document.getElementById('gender').value,
+                    address: sanitizeInput(document.getElementById('address').value.trim()),
+                    phoneNumber: '+212' + document.getElementById('phone-number').value,
+                    idNumber: sanitizeInput(document.getElementById('id-number').value.trim()),
+                    issueDate: document.getElementById('issue-date').value,
+                    expiryDate: document.getElementById('expiry-date').value,
+                    maritalStatus: document.getElementById('marital-status').value,
+                    personalPhoto: photoInput.files[0]
+                };
 
                 // Validation
                 let hasError = false;
+                if (!formData.fullName) { showError('full-name'); hasError = true; }
+                if (!formData.birthDate) { showError('birth-date'); hasError = true; }
+                if (!formData.gender) { showError('gender'); hasError = true; }
+                if (!formData.address) { showError('address'); hasError = true; }
+                if (!/^\+212[5-7][0-9]{8}$/.test(formData.phoneNumber)) { showError('phone-number'); hasError = true; }
+                if (!formData.idNumber) { showError('id-number'); hasError = true; }
+                if (!formData.issueDate) { showError('issue-date'); hasError = true; }
+                if (!formData.expiryDate || new Date(formData.expiryDate) <= new Date(formData.issueDate)) { 
+                    showError('expiry-date'); hasError = true; 
+                }
+                if (!formData.maritalStatus) { showError('marital-status'); hasError = true; }
 
-                if (!fullName) {
-                    showError('full-name');
-                    hasError = true;
-                }
-                if (!birthDate) {
-                    showError('birth-date');
-                    hasError = true;
-                }
-                if (!gender) {
-                    showError('gender');
-                    hasError = true;
-                }
-                if (!address) {
-                    showError('address');
-                    hasError = true;
-                }
-                if (!/^\+212[5-7][0-9]{8}$/.test(phoneNumber)) {
-                    showError('phone-number');
-                    hasError = true;
-                }
-                if (!idNumber) {
-                    showError('id-number');
-                    hasError = true;
-                }
-                if (!issueDate) {
-                    showError('issue-date');
-                    hasError = true;
-                }
-                if (!expiryDate || new Date(expiryDate) <= new Date(issueDate)) {
-                    showError('expiry-date');
-                    hasError = true;
-                }
-                if (!maritalStatus) {
-                    showError('marital-status');
-                    hasError = true;
-                }
+                if (hasError) return;
 
-                if (hasError) {
-                    loadingOverlay.style.display = 'none';
+                // Check for existing ID number
+                const idExists = await checkExistingId(formData.idNumber);
+                if (idExists) {
+                    showMessage(duplicateIdMessage);
                     return;
                 }
 
-                // Check if the user already exists
-                const userExists = await checkExistingUser(idNumber);
-                if (userExists) {
-                    showError('id-number', 'رقم البطاقة الوطنية موجود بالفعل');
-                    loadingOverlay.style.display = 'none';
+                // Check for existing phone number
+                const phoneExists = await checkExistingPhone(formData.phoneNumber);
+                if (phoneExists) {
+                    showMessage(duplicatePhoneMessage);
                     return;
                 }
 
-                // Upload image to Cloudinary
-                let personalPhotoURL = null;
-                if (personalPhoto) {
-                    personalPhotoURL = await uploadToCloudinary(personalPhoto);
-                }
+                // Upload photo if exists
+                formData.personalPhotoURL = formData.personalPhoto ? await uploadToCloudinary(formData.personalPhoto) : null;
 
-                // Add data to Firestore
+                // Save to Firestore
                 await addDoc(collection(db, 'national_id_data'), {
-                    fullName,
-                    birthDate,
-                    gender,
-                    address,
-                    phoneNumber,
-                    idNumber,
-                    issueDate,
-                    expiryDate,
-                    maritalStatus,
-                    personalPhoto: personalPhotoURL,
+                    ...formData,
+                    personalPhoto: formData.personalPhotoURL,
                     createdAt: serverTimestamp()
                 });
 
-                showSuccessMessage();
-                document.getElementById('national-id-form').reset();
-                document.getElementById('preview-image').style.display = 'none';
-                document.getElementById('upload-confirmation').style.display = 'none';
+                showMessage(successMessage);
+                form.reset();
+                previewImage.style.display = 'none';
+                uploadConfirmation.style.display = 'none';
             } catch (error) {
                 console.error('خطأ أثناء الإرسال:', error);
                 alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
