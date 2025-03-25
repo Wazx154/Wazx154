@@ -149,7 +149,7 @@
 
         .expired { background-color: #fee2e2; }
         .active { background-color: #e6ffe6; }
-        .warning { background-color: #fff3e0; } /* Added for expiring soon */
+        .warning { background-color: #fff3e0; }
 
         .table img {
             width: 80px;
@@ -415,8 +415,7 @@
         <nav><ul class="pagination justify-content-center mt-3" id="pagination-controls"></ul></nav>
 
         <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
-            <button id="export-excel-btn" class="btn btn-success"><i class="fas fa-download"></i> تصدير Excel</button>
-            <button id="export-json-btn" class="btn btn-success"><i class="fas fa-file-export"></i> نسخ احتياطي (JSON)</button>
+            <button id="export-excel-btn" class="btn btn-success"><i class="fas fa-download"></i> تصدير Excel</button>          <button id="export-json-btn" class="btn btn-success"><i class="fas fa-file-export"></i> نسخ احتياطي (JSON)</button>
             <button id="import-btn" class="btn btn-warning"><i class="fas fa-file-import"></i> استيراد بيانات</button>
             <input type="file" id="import-file" accept=".json,.xlsx" style="display: none;">
             <button id="print-btn" class="btn btn-success"><i class="fas fa-print"></i> طباعة</button>
@@ -582,7 +581,7 @@
         let currentPage = 1;
         let allUsers = [];
         let deleteId = null;
-        const EXPIRY_WARNING_DAYS = 30; // Notify if expiry is within 30 days
+        const EXPIRY_WARNING_DAYS = 30;
 
         function sanitizeInput(input) {
             const div = document.createElement('div');
@@ -916,22 +915,42 @@
                 if (file.name.endsWith('.json')) {
                     const text = await file.text();
                     const importedData = JSON.parse(text);
+                    let addedCount = 0;
+                    let updatedCount = 0;
+
                     for (const user of importedData) {
-                        await setDoc(doc(db, 'national_id_data', user.idNumber), {
-                            fullName: user.fullName,
-                            birthDate: user.birthDateRaw,
-                            gender: user.gender,
-                            maritalStatus: user.maritalStatus,
-                            address: user.address,
-                            phoneNumber: user.phoneNumber,
-                            idNumber: user.idNumber,
-                            issueDate: user.issueDateRaw,
-                            expiryDate: user.expiryDateRaw,
-                            personalPhoto: user.personalPhoto,
-                            createdAt: user.createdAtRaw || serverTimestamp(),
+                        const userDocRef = doc(db, 'national_id_data', user.idNumber);
+                        const userDoc = await getDoc(userDocRef);
+
+                        const sanitizedUser = {
+                            fullName: sanitizeInput(user.fullName) || 'غير محدد',
+                            birthDate: user.birthDateRaw || '',
+                            gender: user.gender || 'غير محدد',
+                            maritalStatus: user.maritalStatus || 'غير محدد',
+                            address: sanitizeInput(user.address) || 'غير محدد',
+                            phoneNumber: sanitizeInput(user.phoneNumber) || 'غير محدد',
+                            idNumber: sanitizeInput(user.idNumber) || 'غير محدد',
+                            issueDate: user.issueDateRaw || '',
+                            expiryDate: user.expiryDateRaw || '',
+                            personalPhoto: user.personalPhoto || 'https://via.placeholder.com/90',
                             updatedAt: serverTimestamp()
-                        }, { merge: true });
+                        };
+
+                        if (userDoc.exists()) {
+                            // تحديث المستخدم الموجود
+                            await updateDoc(userDocRef, sanitizedUser);
+                            updatedCount++;
+                        } else {
+                            // إضافة مستخدم جديد
+                            await setDoc(userDocRef, {
+                                ...sanitizedUser,
+                                createdAt: user.createdAtRaw || serverTimestamp()
+                            });
+                            addedCount++;
+                        }
                     }
+                    fetchUsers();
+                    showNotification(`تم استيراد البيانات بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث`, 'success');
                 } else if (file.name.endsWith('.xlsx')) {
                     const reader = new FileReader();
                     reader.onload = async (e) => {
@@ -939,29 +958,43 @@
                         const workbook = XLSX.read(data, { type: 'array' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         const jsonData = XLSX.utils.sheet_to_json(sheet);
+                        let addedCount = 0;
+                        let updatedCount = 0;
+
                         for (const user of jsonData) {
-                            await setDoc(doc(db, 'national_id_data', user['رقم البطاقة']), {
-                                fullName: user['الاسم الكامل'],
-                                birthDate: user['تاريخ الميلاد'],
-                                gender: user['الجنس'] === 'ذكر' ? 'male' : 'female',
-                                maritalStatus: user['حالة الزواج'] === 'أعزب/عزباء' ? 'single' : user['حالة الزواج'] === 'متزوج/متزوجة' ? 'married' : user['حالة الزواج'] === 'مطلق/مطلقة' ? 'divorced' : 'widowed',
-                                address: user['العنوان'],
-                                phoneNumber: user['رقم الهاتف'],
-                                idNumber: user['رقم البطاقة'],
-                                issueDate: user['تاريخ الإصدار'],
-                                expiryDate: user['تاريخ الانتهاء'],
-                                personalPhoto: 'https://via.placeholder.com/90', // Default photo
-                                createdAt: serverTimestamp(),
+                            const userDocRef = doc(db, 'national_id_data', user['رقم البطاقة']);
+                            const userDoc = await getDoc(userDocRef);
+
+                            const sanitizedUser = {
+                                fullName: sanitizeInput(user['الاسم الكامل']) || 'غير محدد',
+                                birthDate: user['تاريخ الميلاد'] || '',
+                                gender: user['الجنس'] === 'ذكر' ? 'male' : user['الجنس'] === 'أنثى' ? 'female' : 'غير محدد',
+                                maritalStatus: user['حالة الزواج'] === 'أعزب/عزباء' ? 'single' : user['حالة الزواج'] === 'متزوج/متزوجة' ? 'married' : user['حالة الزواج'] === 'مطلق/مطلقة' ? 'divorced' : user['حالة الزواج'] === 'أرمل/أرملة' ? 'widowed' : 'غير محدد',
+                                address: sanitizeInput(user['العنوان']) || 'غير محدد',
+                                phoneNumber: sanitizeInput(user['رقم الهاتف']) || 'غير محدد',
+                                idNumber: sanitizeInput(user['رقم البطاقة']) || 'غير محدد',
+                                issueDate: user['تاريخ الإصدار'] || '',
+                                expiryDate: user['تاريخ الانتهاء'] || '',
+                                personalPhoto: 'https://via.placeholder.com/90',
                                 updatedAt: serverTimestamp()
-                            }, { merge: true });
+                            };
+
+                            if (userDoc.exists()) {
+                                await updateDoc(userDocRef, sanitizedUser);
+                                updatedCount++;
+                            } else {
+                                await setDoc(userDocRef, {
+                                    ...sanitizedUser,
+                                    createdAt: serverTimestamp()
+                                });
+                                addedCount++;
+                            }
                         }
                         fetchUsers();
-                        showNotification('تم استيراد البيانات من Excel بنجاح', 'success');
+                        showNotification(`تم استيراد البيانات من Excel بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث`, 'success');
                     };
                     reader.readAsArrayBuffer(file);
                 }
-                fetchUsers();
-                showNotification('تم استيراد البيانات بنجاح', 'success');
             } catch (error) {
                 console.error('خطأ في الاستيراد:', error);
                 alert('حدث خطأ أثناء الاستيراد!');
