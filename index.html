@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -247,13 +246,11 @@
             border-color: var(--error-color) !important;
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -265,32 +262,26 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        /* Media Queries */
         @media (max-width: 768px) {
             body {
                 padding: 20px;
             }
-
             h1 {
                 font-size: 2rem;
             }
-
             .container {
                 padding: 25px;
             }
-
             .btn {
                 font-size: 1rem;
                 padding: 10px 20px;
             }
-
             .form-control,
             .form-select {
                 font-size: 1rem;
@@ -298,7 +289,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h1 class="animate__animated animate__fadeIn">إدخال معلومات البطاقة الوطنية المغربية</h1>
@@ -338,8 +328,7 @@
                     <span class="input-group-text">+212</span>
                     <input type="tel" class="form-control" id="phone-number" placeholder="600000000" required>
                 </div>
-                <div class="error-message" id="phone-number-error">يرجى إدخال رقم هاتف مغربي صحيح (مثال: 6xxxxxxxx)
-                </div>
+                <div class="error-message" id="phone-number-error">يرجى إدخال رقم هاتف مغربي صحيح (مثال: 6xxxxxxxx)</div>
             </div>
 
             <div class="form-group">
@@ -357,8 +346,7 @@
             <div class="form-group">
                 <label for="expiry-date" class="form-label"><i class="fas fa-calendar-times"></i> تاريخ الانتهاء</label>
                 <input type="date" class="form-control" id="expiry-date" required>
-                <div class="error-message" id="expiry-date-error">تاريخ الانتهاء يجب أن يكون لاحقًا لتاريخ الإصدار
-                </div>
+                <div class="error-message" id="expiry-date-error">تاريخ الانتهاء يجب أن يكون لاحقًا لتاريخ الإصدار</div>
             </div>
 
             <div class="form-group">
@@ -383,15 +371,12 @@
                     <img id="preview-image" src="#" alt="معاينة الصورة">
                     <div id="upload-confirmation" class="upload-confirmation">تم تحميل الصورة بنجاح!</div>
                 </div>
-                <div class="error-message" id="personal-photo-error" style="display: none;">يرجى اختيار صورة شخصية</div>
             </div>
 
             <div class="button-container">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> إرسال</button>
-                <button type="button" class="btn btn-success" onclick="window.location.href='استقبل المعلومات.html'"><i
-                        class="fas fa-users"></i> قائمة المستخدمين</button>
-                <button type="button" id="logout-button" class="btn btn-danger"><i
-                        class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+                <button type="button" class="btn btn-success" onclick="window.location.href='استقبل المعلومات.html'"><i class="fas fa-users"></i> قائمة المستخدمين</button>
+                <button type="button" id="logout-button" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
             </div>
         </form>
 
@@ -407,20 +392,9 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import {
-            getAuth,
-            signOut,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import {
-            getFirestore,
-            collection,
-            addDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -449,46 +423,60 @@
             }
         });
 
-        // Function to sanitize input
-        function sanitizeInput(input) {
+        // Utility Functions
+        const sanitizeInput = (input) => {
             const div = document.createElement('div');
             div.textContent = input;
             return div.innerHTML;
-        }
+        };
 
-        // Function to upload image to Cloudinary
-        async function uploadToCloudinary(file) {
-            if (!file) {
-                return null; // Return null if no file is selected
-            }
+        const showError = (fieldId, message = null) => {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if (message) errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            document.getElementById(fieldId).classList.add('is-invalid');
+        };
+
+        const resetErrors = () => {
+            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
+        };
+
+        const showSuccessMessage = () => {
+            const successMessage = document.getElementById('success-message');
+            successMessage.classList.add('show');
+            setTimeout(() => successMessage.classList.remove('show'), 3000);
+        };
+
+        // Cloudinary Image Upload
+        const uploadToCloudinary = async (file) => {
+            if (!file) return null;
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', uploadPreset);
 
-            try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
 
-                if (!response.ok) {
-                    throw new Error('فشل رفع الصورة');
-                }
+            if (!response.ok) throw new Error('فشل رفع الصورة');
+            const data = await response.json();
+            return data.secure_url;
+        };
 
-                const data = await response.json();
-                return data.secure_url;
-            } catch (error) {
-                console.error("Cloudinary Upload Error:", error);
-                throw error; // Re-throw to be caught by the form submission handler
-            }
-        }
+        // Check if ID number already exists in Firestore
+        const checkExistingUser = async (idNumber) => {
+            const q = query(collection(db, 'national_id_data'), where('idNumber', '==', idNumber));
+            const querySnapshot = await getDocs(q);
+            return !querySnapshot.empty; // Returns true if user exists
+        };
 
         // Phone number formatting
-        const phoneInput = document.getElementById('phone-number');
-        phoneInput.addEventListener('input', (e) => {
+        document.getElementById('phone-number').addEventListener('input', (e) => {
             let value = e.target.value.replace(/\D/g, '');
-            value = value.slice(0, 9); // Limit to 9 digits after the country code
+            value = value.slice(0, 9);
             e.target.value = value;
         });
 
@@ -500,13 +488,11 @@
 
             if (file) {
                 const reader = new FileReader();
-
                 reader.onload = (e) => {
                     previewImage.src = e.target.result;
                     previewImage.style.display = 'block';
                     confirmation.style.display = 'block';
-                }
-
+                };
                 reader.readAsDataURL(file);
             } else {
                 previewImage.src = '#';
@@ -530,80 +516,77 @@
         document.getElementById('national-id-form').addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            // Reset error messages and styles
-            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.form-control, .form-select').forEach(el => el.classList.remove('is-invalid'));
-
-            // Show loading overlay
+            resetErrors();
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.style.display = 'flex';
 
             try {
-                // Get form values and sanitize them
+                // Get and sanitize form values
                 const fullName = sanitizeInput(document.getElementById('full-name').value.trim());
                 const birthDate = document.getElementById('birth-date').value;
                 const gender = document.getElementById('gender').value;
                 const address = sanitizeInput(document.getElementById('address').value.trim());
-                const phoneNumber = '+212' + document.getElementById('phone-number').value; // Ensure phone number includes country code
+                const phoneNumber = '+212' + document.getElementById('phone-number').value;
                 const idNumber = sanitizeInput(document.getElementById('id-number').value.trim());
                 const issueDate = document.getElementById('issue-date').value;
                 const expiryDate = document.getElementById('expiry-date').value;
                 const maritalStatus = document.getElementById('marital-status').value;
                 const personalPhoto = document.getElementById('personal-photo').files[0];
 
-                // Validate form inputs
+                // Validation
                 let hasError = false;
 
                 if (!fullName) {
                     showError('full-name');
                     hasError = true;
                 }
-
                 if (!birthDate) {
                     showError('birth-date');
                     hasError = true;
                 }
-
                 if (!gender) {
                     showError('gender');
                     hasError = true;
                 }
-
                 if (!address) {
                     showError('address');
                     hasError = true;
                 }
-
                 if (!/^\+212[5-7][0-9]{8}$/.test(phoneNumber)) {
                     showError('phone-number');
                     hasError = true;
                 }
-
                 if (!idNumber) {
                     showError('id-number');
                     hasError = true;
                 }
-
                 if (!issueDate) {
                     showError('issue-date');
                     hasError = true;
                 }
-
                 if (!expiryDate || new Date(expiryDate) <= new Date(issueDate)) {
                     showError('expiry-date');
                     hasError = true;
                 }
-
                 if (!maritalStatus) {
                     showError('marital-status');
                     hasError = true;
                 }
 
                 if (hasError) {
-                    return; // Stop submission if there are errors
+                    loadingOverlay.style.display = 'none';
+                    return;
                 }
 
-                // Upload the image to Cloudinary if selected
+                // Check if the user already exists
+                const userExists = await checkExistingUser(idNumber);
+                if (userExists) {
+                    showError('id-number', 'رقم البطاقة الوطنية موجود بالفعل');
+                    loadingOverlay.style.display = 'none';
+                    return;
+                }
+
+                // Upload image to Cloudinary
                 let personalPhotoURL = null;
                 if (personalPhoto) {
                     personalPhotoURL = await uploadToCloudinary(personalPhoto);
@@ -624,14 +607,7 @@
                     createdAt: serverTimestamp()
                 });
 
-                // Show success message
-                const successMessage = document.getElementById('success-message');
-                successMessage.classList.add('show');
-                setTimeout(() => {
-                    successMessage.classList.remove('show');
-                }, 3000);
-
-                // Reset the form
+                showSuccessMessage();
                 document.getElementById('national-id-form').reset();
                 document.getElementById('preview-image').style.display = 'none';
                 document.getElementById('upload-confirmation').style.display = 'none';
@@ -639,18 +615,9 @@
                 console.error('خطأ أثناء الإرسال:', error);
                 alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
             } finally {
-                // Hide loading overlay
                 loadingOverlay.style.display = 'none';
             }
         });
-
-        // Function to display error messages
-        function showError(fieldId) {
-            const errorElement = document.getElementById(`${fieldId}-error`);
-            errorElement.style.display = 'block';
-            document.getElementById(fieldId).classList.add('is-invalid');
-        }
     </script>
 </body>
-
 </html>
