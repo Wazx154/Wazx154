@@ -415,7 +415,8 @@
         <nav><ul class="pagination justify-content-center mt-3" id="pagination-controls"></ul></nav>
 
         <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
-            <button id="export-excel-btn" class="btn btn-success"><i class="fas fa-download"></i> تصدير Excel</button>          <button id="export-json-btn" class="btn btn-success"><i class="fas fa-file-export"></i> نسخ احتياطي (JSON)</button>
+            <button id="export-excel-btn" class="btn btn-success"><i class="fas fa-download"></i> تصدير Excel</button>
+            <button id="export-json-btn" class="btn btn-success"><i class="fas fa-file-export"></i> نسخ احتياطي (JSON)</button>
             <button id="import-btn" class="btn btn-warning"><i class="fas fa-file-import"></i> استيراد بيانات</button>
             <input type="file" id="import-file" accept=".json,.xlsx" style="display: none;">
             <button id="print-btn" class="btn btn-success"><i class="fas fa-print"></i> طباعة</button>
@@ -912,16 +913,32 @@
             if (!file) return;
 
             try {
+                loadingSpinner.style.display = 'block';
+                
                 if (file.name.endsWith('.json')) {
                     const text = await file.text();
                     const importedData = JSON.parse(text);
                     let addedCount = 0;
                     let updatedCount = 0;
+                    let skippedCount = 0;
+
+                    // إنشاء مجموعة من أرقام البطاقات الموجودة بالفعل لتجنب التكرار
+                    const existingIds = new Set(allUsers.map(user => user.idNumber));
 
                     for (const user of importedData) {
-                        const userDocRef = doc(db, 'national_id_data', user.idNumber);
-                        const userDoc = await getDoc(userDocRef);
+                        // التحقق من وجود رقم البطاقة في البيانات المستوردة
+                        if (!user.idNumber) {
+                            skippedCount++;
+                            continue;
+                        }
 
+                        // إذا كان رقم البطاقة موجودًا بالفعل، نتخطى هذه السجل
+                        if (existingIds.has(user.idNumber)) {
+                            skippedCount++;
+                            continue;
+                        }
+
+                        const userDocRef = doc(db, 'national_id_data', user.idNumber);
                         const sanitizedUser = {
                             fullName: sanitizeInput(user.fullName) || 'غير محدد',
                             birthDate: user.birthDateRaw || '',
@@ -933,24 +950,20 @@
                             issueDate: user.issueDateRaw || '',
                             expiryDate: user.expiryDateRaw || '',
                             personalPhoto: user.personalPhoto || 'https://via.placeholder.com/90',
+                            createdAt: user.createdAtRaw || serverTimestamp(),
                             updatedAt: serverTimestamp()
                         };
 
-                        if (userDoc.exists()) {
-                            // تحديث المستخدم الموجود
-                            await updateDoc(userDocRef, sanitizedUser);
-                            updatedCount++;
-                        } else {
-                            // إضافة مستخدم جديد
-                            await setDoc(userDocRef, {
-                                ...sanitizedUser,
-                                createdAt: user.createdAtRaw || serverTimestamp()
-                            });
-                            addedCount++;
-                        }
+                        await setDoc(userDocRef, sanitizedUser);
+                        addedCount++;
+                        existingIds.add(user.idNumber); // إضافة رقم البطاقة إلى المجموعة
                     }
+                    
                     fetchUsers();
-                    showNotification(`تم استيراد البيانات بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث`, 'success');
+                    showNotification(
+                        `تم استيراد البيانات بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث، ${skippedCount} تخطي (مكرر أو بدون رقم بطاقة)`,
+                        'success'
+                    );
                 } else if (file.name.endsWith('.xlsx')) {
                     const reader = new FileReader();
                     reader.onload = async (e) => {
@@ -960,46 +973,62 @@
                         const jsonData = XLSX.utils.sheet_to_json(sheet);
                         let addedCount = 0;
                         let updatedCount = 0;
+                        let skippedCount = 0;
+
+                        // إنشاء مجموعة من أرقام البطاقات الموجودة بالفعل لتجنب التكرار
+                        const existingIds = new Set(allUsers.map(user => user.idNumber));
 
                         for (const user of jsonData) {
-                            const userDocRef = doc(db, 'national_id_data', user['رقم البطاقة']);
-                            const userDoc = await getDoc(userDocRef);
+                            // التحقق من وجود رقم البطاقة في البيانات المستوردة
+                            if (!user['رقم البطاقة']) {
+                                skippedCount++;
+                                continue;
+                            }
 
+                            // إذا كان رقم البطاقة موجودًا بالفعل، نتخطى هذه السجل
+                            if (existingIds.has(user['رقم البطاقة'])) {
+                                skippedCount++;
+                                continue;
+                            }
+
+                            const userDocRef = doc(db, 'national_id_data', user['رقم البطاقة']);
                             const sanitizedUser = {
                                 fullName: sanitizeInput(user['الاسم الكامل']) || 'غير محدد',
                                 birthDate: user['تاريخ الميلاد'] || '',
                                 gender: user['الجنس'] === 'ذكر' ? 'male' : user['الجنس'] === 'أنثى' ? 'female' : 'غير محدد',
-                                maritalStatus: user['حالة الزواج'] === 'أعزب/عزباء' ? 'single' : user['حالة الزواج'] === 'متزوج/متزوجة' ? 'married' : user['حالة الزواج'] === 'مطلق/مطلقة' ? 'divorced' : user['حالة الزواج'] === 'أرمل/أرملة' ? 'widowed' : 'غير محدد',
+                                maritalStatus: user['حالة الزواج'] === 'أعزب/عزباء' ? 'single' : 
+                                              user['حالة الزواج'] === 'متزوج/متزوجة' ? 'married' : 
+                                              user['حالة الزواج'] === 'مطلق/مطلقة' ? 'divorced' : 
+                                              user['حالة الزواج'] === 'أرمل/أرملة' ? 'widowed' : 'غير محدد',
                                 address: sanitizeInput(user['العنوان']) || 'غير محدد',
                                 phoneNumber: sanitizeInput(user['رقم الهاتف']) || 'غير محدد',
                                 idNumber: sanitizeInput(user['رقم البطاقة']) || 'غير محدد',
                                 issueDate: user['تاريخ الإصدار'] || '',
                                 expiryDate: user['تاريخ الانتهاء'] || '',
                                 personalPhoto: 'https://via.placeholder.com/90',
+                                createdAt: serverTimestamp(),
                                 updatedAt: serverTimestamp()
                             };
 
-                            if (userDoc.exists()) {
-                                await updateDoc(userDocRef, sanitizedUser);
-                                updatedCount++;
-                            } else {
-                                await setDoc(userDocRef, {
-                                    ...sanitizedUser,
-                                    createdAt: serverTimestamp()
-                                });
-                                addedCount++;
-                            }
+                            await setDoc(userDocRef, sanitizedUser);
+                            addedCount++;
+                            existingIds.add(user['رقم البطاقة']); // إضافة رقم البطاقة إلى المجموعة
                         }
+                        
                         fetchUsers();
-                        showNotification(`تم استيراد البيانات من Excel بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث`, 'success');
+                        showNotification(
+                            `تم استيراد البيانات من Excel بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث، ${skippedCount} تخطي (مكرر أو بدون رقم بطاقة)`,
+                            'success'
+                        );
                     };
                     reader.readAsArrayBuffer(file);
                 }
             } catch (error) {
                 console.error('خطأ في الاستيراد:', error);
-                alert('حدث خطأ أثناء الاستيراد!');
+                showNotification('حدث خطأ أثناء الاستيراد!', 'error');
             } finally {
                 importFile.value = '';
+                loadingSpinner.style.display = 'none';
             }
         });
 
