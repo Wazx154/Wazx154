@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض معلومات البطاقة الوطنية المغربية</title>
+    <title>نظام إدارة البطاقات الوطنية المغربية</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -359,7 +359,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="animate__animated animate__fadeIn">عرض معلومات البطاقة الوطنية المغربية</h1>
+        <h1 class="animate__animated animate__fadeIn">نظام إدارة البطاقات الوطنية المغربية</h1>
 
         <div class="stats-container animate__animated animate__fadeIn">
             <div class="stats-box" style="background: #00796b;">إجمالي البطاقات: <span id="totalCards">0</span></div>
@@ -541,8 +541,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            doc, 
+            deleteDoc, 
+            updateDoc, 
+            setDoc, 
+            getDoc, 
+            serverTimestamp,
+            writeBatch,
+            query,
+            where
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // تكوين Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDpYauuaSBRHFSOeykFiZai3BSPVXQ8CP0",
             authDomain: "new-project-d4813.firebaseapp.com",
@@ -553,9 +567,11 @@
             measurementId: "G-1XJJGHR2W4"
         };
 
+        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // عناصر DOM
         const userList = document.getElementById('user-list');
         const noResults = document.getElementById('no-results');
         const errorMessage = document.getElementById('error-message');
@@ -578,36 +594,48 @@
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
         const notification = document.getElementById('notification');
 
-        const itemsPerPage = 10;
+        // الثوابت والمتغيرات العامة
+        const ITEMS_PER_PAGE = 10;
+        const EXPIRY_WARNING_DAYS = 30;
         let currentPage = 1;
         let allUsers = [];
         let deleteId = null;
-        const EXPIRY_WARNING_DAYS = 30;
 
+        // ========== دوال المساعدة ==========
+
+        // تنظيف المدخلات لمنع هجمات XSS
         function sanitizeInput(input) {
-            const div = document.createElement('div');
-            div.textContent = input || '';
-            return div.innerHTML;
+            if (typeof input !== 'string') return input;
+            return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
+        // تنسيق التاريخ لعرضه بشكل مقروء
         function formatDate(dateInput) {
             if (!dateInput) return 'غير محدد';
-            const date = dateInput.toDate ? dateInput.toDate() : new Date(dateInput);
-            if (isNaN(date)) return 'غير محدد';
-            return date.toLocaleString('ar-MA', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-            });
+            
+            try {
+                const date = dateInput.toDate ? dateInput.toDate() : new Date(dateInput);
+                if (isNaN(date.getTime())) return 'غير محدد';
+                
+                return date.toLocaleString('ar-MA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            } catch (e) {
+                return 'غير محدد';
+            }
         }
 
+        // تنسيق الجنس
         function formatGender(gender) {
             return gender === 'male' ? 'ذكر' : gender === 'female' ? 'أنثى' : sanitizeInput(gender) || 'غير محدد';
         }
 
+        // تنسيق حالة الزواج
         function formatMaritalStatus(status) {
             switch (status) {
                 case 'single': return 'أعزب/عزباء';
@@ -618,6 +646,7 @@
             }
         }
 
+        // تنسيق رقم الهاتف
         function formatPhoneNumber(phone) {
             if (!phone) return 'غير محدد';
             const cleanPhone = phone.replace(/[^0-9+]/g, '');
@@ -627,6 +656,7 @@
             return sanitizeInput(phone) || 'غير محدد';
         }
 
+        // عرض الإشعارات
         function showNotification(message, type = 'success') {
             notification.textContent = message;
             notification.className = `notification ${type}`;
@@ -634,19 +664,36 @@
             setTimeout(() => notification.style.display = 'none', 5000);
         }
 
+        // تأخير تنفيذ الدالة لتقليل عدد الطلبات
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func(...args), wait);
+            };
+        }
+
+        // التحقق من صلاحية البطاقات وإظهار تحذيرات للبطاقات القريبة من الانتهاء
         function checkExpiryWarnings(users) {
             const today = new Date();
             const warningDate = new Date(today);
             warningDate.setDate(today.getDate() + EXPIRY_WARNING_DAYS);
 
             users.forEach(user => {
-                const expiryDate = new Date(user.expiryDateRaw);
-                if (expiryDate > today && expiryDate <= warningDate) {
-                    showNotification(`البطاقة لـ "${user.fullName}" ستنتهي قريبًا في ${user.expiryDate}`, 'warning');
+                try {
+                    const expiryDate = new Date(user.expiryDateRaw);
+                    if (expiryDate > today && expiryDate <= warningDate) {
+                        showNotification(`تنبيه: البطاقة لـ "${user.fullName}" ستنتهي صلاحيتها في ${user.expiryDate}`, 'warning');
+                    }
+                } catch (e) {
+                    console.error('خطأ في تحقق تاريخ الانتهاء:', e);
                 }
             });
         }
 
+        // ========== دوال عرض البيانات ==========
+
+        // عرض تفاصيل المستخدم في نافذة منبثقة
         function showUserDetails(user) {
             const modalBodyContent = document.getElementById('modalBodyContent');
             modalBodyContent.innerHTML = `
@@ -666,9 +713,14 @@
             modal.show();
         }
 
+        // تحميل بيانات المستخدم في نموذج التعديل
         function editUser(docId) {
             const user = allUsers.find(u => u.docId === docId);
-            if (!user) return;
+            if (!user) {
+                showNotification('لم يتم العثور على المستخدم', 'warning');
+                return;
+            }
+
             document.getElementById('edit-doc-id').value = docId;
             document.getElementById('edit-fullName').value = user.fullName;
             document.getElementById('edit-birthDate').value = user.birthDateRaw;
@@ -680,12 +732,21 @@
             document.getElementById('edit-issueDate').value = user.issueDateRaw;
             document.getElementById('edit-expiryDate').value = user.expiryDateRaw;
             document.getElementById('edit-personalPhoto').value = user.personalPhoto;
+            
             const modal = new bootstrap.Modal(document.getElementById('editModal'));
             modal.show();
         }
 
+        // حفظ التعديلات على بيانات المستخدم
         async function saveEdit() {
             const docId = document.getElementById('edit-doc-id').value;
+            const newIdNumber = sanitizeInput(document.getElementById('edit-idNumber').value);
+            
+            if (!docId || !newIdNumber) {
+                showNotification('رقم البطاقة مطلوب', 'warning');
+                return;
+            }
+
             const updatedData = {
                 fullName: sanitizeInput(document.getElementById('edit-fullName').value),
                 birthDate: document.getElementById('edit-birthDate').value,
@@ -693,67 +754,84 @@
                 maritalStatus: document.getElementById('edit-maritalStatus').value,
                 address: sanitizeInput(document.getElementById('edit-address').value),
                 phoneNumber: sanitizeInput(document.getElementById('edit-phoneNumber').value),
-                idNumber: sanitizeInput(document.getElementById('edit-idNumber').value),
+                idNumber: newIdNumber,
                 issueDate: document.getElementById('edit-issueDate').value,
                 expiryDate: document.getElementById('edit-expiryDate').value,
                 personalPhoto: sanitizeInput(document.getElementById('edit-personalPhoto').value),
                 updatedAt: serverTimestamp()
             };
 
+            // التحقق من البيانات المطلوبة
             if (Object.values(updatedData).some(val => !val)) {
-                alert('يرجى ملء جميع الحقول!');
+                showNotification('يرجى ملء جميع الحقول المطلوبة', 'warning');
                 return;
             }
 
             try {
                 const oldUser = allUsers.find(u => u.docId === docId);
+                
+                // إذا تغير رقم البطاقة، نتحقق من عدم وجود تكرار
                 if (oldUser.idNumber !== updatedData.idNumber) {
                     const idCheck = await getDoc(doc(db, 'national_id_data', updatedData.idNumber));
                     if (idCheck.exists()) {
-                        alert('رقم البطاقة موجود مسبقًا!');
+                        showNotification('رقم البطاقة موجود مسبقًا!', 'warning');
                         return;
                     }
-                    await deleteDoc(doc(db, 'national_id_data', docId));
-                    await setDoc(doc(db, 'national_id_data', updatedData.idNumber), { 
+                    
+                    // إنشاء وثيقة جديدة وحذف القديمة في عملية واحدة
+                    const batch = writeBatch(db);
+                    batch.set(doc(db, 'national_id_data', updatedData.idNumber), { 
                         ...updatedData, 
-                        createdAt: oldUser.createdAtRaw ? oldUser.createdAtRaw : serverTimestamp() 
+                        createdAt: oldUser.createdAtRaw || serverTimestamp() 
                     });
+                    batch.delete(doc(db, 'national_id_data', docId));
+                    await batch.commit();
                 } else {
+                    // تحديث الوثيقة الحالية إذا لم يتغير رقم البطاقة
                     await updateDoc(doc(db, 'national_id_data', docId), updatedData);
                 }
+                
                 bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
                 fetchUsers();
-                showNotification('تم حفظ التعديلات بنجاح', 'success');
+                showNotification('تم تحديث بيانات البطاقة بنجاح', 'success');
             } catch (error) {
-                console.error('خطأ في الحفظ:', error);
-                alert('حدث خطأ أثناء الحفظ!');
+                console.error('خطأ في حفظ التعديلات:', error);
+                showNotification('حدث خطأ أثناء حفظ التعديلات', 'error');
             }
         }
 
+        // تأكيد حذف المستخدم
         function confirmDeleteUser(docId) {
             const user = allUsers.find(u => u.docId === docId);
-            if (!user) return;
+            if (!user) {
+                showNotification('لم يتم العثور على المستخدم', 'warning');
+                return;
+            }
+            
             deleteId = docId;
             document.getElementById('delete-user-name').textContent = user.fullName;
             const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
             modal.show();
         }
 
+        // حذف المستخدم بعد التأكيد
         async function deleteUser() {
             if (!deleteId) return;
+            
             try {
                 await deleteDoc(doc(db, 'national_id_data', deleteId));
                 bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
                 fetchUsers();
-                showNotification('تم الحذف بنجاح', 'success');
+                showNotification('تم حذف البطاقة بنجاح', 'success');
             } catch (error) {
-                console.error('خطأ في الحذف:', error);
-                alert('حدث خطأ أثناء الحذف!');
+                console.error('خطأ في حذف البطاقة:', error);
+                showNotification('حدث خطأ أثناء حذف البطاقة', 'error');
             } finally {
                 deleteId = null;
             }
         }
 
+        // جلب بيانات المستخدمين من Firebase
         async function fetchUsers(searchQuery = '', genderFilter = '', page = 1) {
             loadingSpinner.style.display = 'block';
             errorMessage.style.display = 'none';
@@ -786,65 +864,44 @@
                     });
                 });
 
+                // التحقق من صلاحية البطاقات وإظهار التحذيرات
                 checkExpiryWarnings(allUsers);
 
+                // تصفية البيانات حسب البحث والفلتر
                 const filteredUsers = allUsers.filter(user => {
                     const isExpired = new Date(user.expiryDateRaw) < new Date();
-                    const isExpiringSoon = new Date(user.expiryDateRaw) > new Date() && new Date(user.expiryDateRaw) <= new Date(Date.now() + EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000);
-                    return (
-                        (user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())) &&
-                        (!genderFilter || user.gender === genderFilter) &&
-                        (!filterStatus.value || 
-                         (filterStatus.value === 'active' && !isExpired && !isExpiringSoon) || 
-                         (filterStatus.value === 'expired' && isExpired) || 
-                         (filterStatus.value === 'expiring-soon' && isExpiringSoon))
-                    );
+                    const isExpiringSoon = new Date(user.expiryDateRaw) > new Date() && 
+                                          new Date(user.expiryDateRaw) <= new Date(Date.now() + EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000);
+                    
+                    const matchesSearch = searchQuery === '' || 
+                                         user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                         user.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                         user.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase());
+                    
+                    const matchesGender = !genderFilter || user.gender === genderFilter;
+                    
+                    const matchesStatus = !filterStatus.value || 
+                                         (filterStatus.value === 'active' && !isExpired && !isExpiringSoon) || 
+                                         (filterStatus.value === 'expired' && isExpired) || 
+                                         (filterStatus.value === 'expiring-soon' && isExpiringSoon);
+                    
+                    return matchesSearch && matchesGender && matchesStatus;
                 });
 
-                totalCards.textContent = filteredUsers.length;
-                activeCards.textContent = filteredUsers.filter(u => new Date(u.expiryDateRaw) >= new Date() && new Date(u.expiryDateRaw) > new Date(Date.now() + EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000)).length;
-                expiredCards.textContent = filteredUsers.filter(u => new Date(u.expiryDateRaw) < new Date()).length;
-                expiringSoonCards.textContent = filteredUsers.filter(u => new Date(u.expiryDateRaw) > new Date() && new Date(u.expiryDateRaw) <= new Date(Date.now() + EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000)).length;
+                // تحديث الإحصائيات
+                updateStatistics(filteredUsers);
 
-                const startIdx = (page - 1) * itemsPerPage;
-                const paginatedUsers = filteredUsers.slice(startIdx, startIdx + itemsPerPage);
+                // التقسيم إلى صفحات
+                const startIdx = (page - 1) * ITEMS_PER_PAGE;
+                const paginatedUsers = filteredUsers.slice(startIdx, startIdx + ITEMS_PER_PAGE);
 
                 if (paginatedUsers.length === 0) {
                     noResults.style.display = 'block';
                 } else {
-                    paginatedUsers.forEach(user => {
-                        const isExpired = new Date(user.expiryDateRaw) < new Date();
-                        const isExpiringSoon = new Date(user.expiryDateRaw) > new Date() && new Date(user.expiryDateRaw) <= new Date(Date.now() + EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000);
-                        const row = document.createElement('tr');
-                        row.classList.add(isExpired ? 'expired' : isExpiringSoon ? 'warning' : 'active');
-                        row.innerHTML = `
-                            <td data-label="الصورة"><img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
-                            <td data-label="الاسم الكامل">${user.fullName}</td>
-                            <td data-label="تاريخ الميلاد">${user.birthDate}</td>
-                            <td data-label="الجنس">${formatGender(user.gender)}</td>
-                            <td data-label="حالة الزواج">${formatMaritalStatus(user.maritalStatus)}</td>
-                            <td data-label="العنوان">${user.address}</td>
-                            <td data-label="رقم البطاقة">${user.idNumber}</td>
-                            <td data-label="رقم الهاتف" class="phone-number">${formatPhoneNumber(user.phoneNumber)}</td>
-                            <td data-label="تاريخ الإصدار">${user.issueDate}</td>
-                            <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
-                            <td data-label="تاريخ الإدخال" class="created-at">${user.createdAt}</td>
-                            <td data-label="الحالة">${isExpired ? 'منتهية' : isExpiringSoon ? 'قريبة الانتهاء' : 'سارية'}</td>
-                            <td data-label="الإجراءات">
-                                <button class="btn btn-sm btn-primary view-details"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-sm btn-success edit-user"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-sm btn-danger delete-user"><i class="fas fa-trash-can"></i></button>
-                            </td>
-                        `;
-                        row.querySelector('.view-details').addEventListener('click', () => showUserDetails(user));
-                        row.querySelector('.edit-user').addEventListener('click', () => editUser(user.docId));
-                        row.querySelector('.delete-user').addEventListener('click', () => confirmDeleteUser(user.docId));
-                        userList.appendChild(row);
-                    });
+                    renderUsersTable(paginatedUsers);
                 }
 
+                // إنشاء عناصر التصفح بين الصفحات
                 generatePagination(filteredUsers.length, page);
             } catch (error) {
                 console.error('خطأ في جلب البيانات:', error);
@@ -854,11 +911,97 @@
             }
         }
 
+        // تحديث إحصائيات البطاقات
+        function updateStatistics(users) {
+            const today = new Date();
+            const warningDate = new Date(today);
+            warningDate.setDate(today.getDate() + EXPIRY_WARNING_DAYS);
+
+            totalCards.textContent = users.length;
+            activeCards.textContent = users.filter(u => {
+                try {
+                    const expiryDate = new Date(u.expiryDateRaw);
+                    return expiryDate >= today && expiryDate > warningDate;
+                } catch (e) {
+                    return false;
+                }
+            }).length;
+            
+            expiredCards.textContent = users.filter(u => {
+                try {
+                    return new Date(u.expiryDateRaw) < today;
+                } catch (e) {
+                    return false;
+                }
+            }).length;
+            
+            expiringSoonCards.textContent = users.filter(u => {
+                try {
+                    const expiryDate = new Date(u.expiryDateRaw);
+                    return expiryDate > today && expiryDate <= warningDate;
+                } catch (e) {
+                    return false;
+                }
+            }).length;
+        }
+
+        // عرض المستخدمين في الجدول
+        function renderUsersTable(users) {
+            users.forEach(user => {
+                const isExpired = new Date(user.expiryDateRaw) < new Date();
+                const isExpiringSoon = new Date(user.expiryDateRaw) > new Date() && 
+                                      new Date(user.expiryDateRaw) <= new Date(Date.now() + EXPIRY_WARNING_DAYS * 24 * 60 * 60 * 1000);
+                
+                const row = document.createElement('tr');
+                row.classList.add(isExpired ? 'expired' : isExpiringSoon ? 'warning' : 'active');
+                row.innerHTML = `
+                    <td data-label="الصورة"><img src="${user.personalPhoto}" alt="الصورة" loading="lazy" onerror="this.src='https://via.placeholder.com/90'"></td>
+                    <td data-label="الاسم الكامل">${user.fullName}</td>
+                    <td data-label="تاريخ الميلاد">${user.birthDate}</td>
+                    <td data-label="الجنس">${formatGender(user.gender)}</td>
+                    <td data-label="حالة الزواج">${formatMaritalStatus(user.maritalStatus)}</td>
+                    <td data-label="العنوان">${user.address}</td>
+                    <td data-label="رقم البطاقة">${user.idNumber}</td>
+                    <td data-label="رقم الهاتف" class="phone-number">${formatPhoneNumber(user.phoneNumber)}</td>
+                    <td data-label="تاريخ الإصدار">${user.issueDate}</td>
+                    <td data-label="تاريخ الانتهاء">${user.expiryDate}</td>
+                    <td data-label="تاريخ الإدخال" class="created-at">${user.createdAt}</td>
+                    <td data-label="الحالة">${isExpired ? 'منتهية' : isExpiringSoon ? 'قريبة الانتهاء' : 'سارية'}</td>
+                    <td data-label="الإجراءات">
+                        <button class="btn btn-sm btn-primary view-details"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-sm btn-success edit-user"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger delete-user"><i class="fas fa-trash-can"></i></button>
+                    </td>
+                `;
+                
+                // إضافة معالجات الأحداث للأزرار
+                row.querySelector('.view-details').addEventListener('click', () => showUserDetails(user));
+                row.querySelector('.edit-user').addEventListener('click', () => editUser(user.docId));
+                row.querySelector('.delete-user').addEventListener('click', () => confirmDeleteUser(user.docId));
+                
+                userList.appendChild(row);
+            });
+        }
+
+        // إنشاء عناصر التصفح بين الصفحات
         function generatePagination(totalItems, currentPage) {
             paginationControls.innerHTML = '';
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
             if (totalPages <= 1) return;
 
+            // زر الصفحة السابقة
+            if (currentPage > 1) {
+                const prevItem = document.createElement('li');
+                prevItem.classList.add('page-item');
+                prevItem.innerHTML = `<a class="page-link" href="#" aria-label="السابق"><i class="fas fa-chevron-right"></i></a>`;
+                prevItem.querySelector('.page-link').addEventListener('click', e => {
+                    e.preventDefault();
+                    fetchUsers(searchInput.value, filterGender.value, currentPage - 1);
+                });
+                paginationControls.appendChild(prevItem);
+            }
+
+            // أرقام الصفحات
             for (let i = 1; i <= totalPages; i++) {
                 const pageItem = document.createElement('li');
                 pageItem.classList.add('page-item');
@@ -866,44 +1009,81 @@
                 pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
                 pageItem.querySelector('.page-link').addEventListener('click', e => {
                     e.preventDefault();
-                    currentPage = i;
                     fetchUsers(searchInput.value, filterGender.value, i);
                 });
                 paginationControls.appendChild(pageItem);
             }
+
+            // زر الصفحة التالية
+            if (currentPage < totalPages) {
+                const nextItem = document.createElement('li');
+                nextItem.classList.add('page-item');
+                nextItem.innerHTML = `<a class="page-link" href="#" aria-label="التالي"><i class="fas fa-chevron-left"></i></a>`;
+                nextItem.querySelector('.page-link').addEventListener('click', e => {
+                    e.preventDefault();
+                    fetchUsers(searchInput.value, filterGender.value, currentPage + 1);
+                });
+                paginationControls.appendChild(nextItem);
+            }
         }
 
+        // ========== دوال التصدير والاستيراد ==========
+
+        // تصدير البيانات إلى Excel
         exportExcelBtn.addEventListener('click', () => {
-            const ws = XLSX.utils.json_to_sheet(allUsers.map(user => ({
-                'الاسم الكامل': user.fullName,
-                'تاريخ الميلاد': user.birthDate,
-                'الجنس': formatGender(user.gender),
-                'حالة الزواج': formatMaritalStatus(user.maritalStatus),
-                'العنوان': user.address,
-                'رقم البطاقة': user.idNumber,
-                'رقم الهاتف': formatPhoneNumber(user.phoneNumber),
-                'تاريخ الإصدار': user.issueDate,
-                'تاريخ الانتهاء': user.expiryDate,
-                'تاريخ الإدخال': user.createdAt
-            })));
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "National_ID_Data");
-            XLSX.writeFile(wb, "national_id_data.xlsx");
-            showNotification('تم تصدير البيانات إلى Excel بنجاح', 'success');
+            if (allUsers.length === 0) {
+                showNotification('لا توجد بيانات للتصدير', 'warning');
+                return;
+            }
+
+            try {
+                const ws = XLSX.utils.json_to_sheet(allUsers.map(user => ({
+                    'الاسم الكامل': user.fullName,
+                    'تاريخ الميلاد': user.birthDate,
+                    'الجنس': formatGender(user.gender),
+                    'حالة الزواج': formatMaritalStatus(user.maritalStatus),
+                    'العنوان': user.address,
+                    'رقم البطاقة': user.idNumber,
+                    'رقم الهاتف': formatPhoneNumber(user.phoneNumber),
+                    'تاريخ الإصدار': user.issueDate,
+                    'تاريخ الانتهاء': user.expiryDate,
+                    'تاريخ الإدخال': user.createdAt
+                })));
+                
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "البطاقات_الوطنية");
+                XLSX.writeFile(wb, "البطاقات_الوطنية.xlsx");
+                showNotification('تم تصدير البيانات إلى ملف Excel بنجاح', 'success');
+            } catch (error) {
+                console.error('خطأ في التصدير إلى Excel:', error);
+                showNotification('حدث خطأ أثناء التصدير إلى Excel', 'error');
+            }
         });
 
+        // تصدير البيانات إلى JSON
         exportJsonBtn.addEventListener('click', () => {
-            const jsonData = JSON.stringify(allUsers, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'national_id_data_backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+            if (allUsers.length === 0) {
+                showNotification('لا توجد بيانات للتصدير', 'warning');
+                return;
+            }
+
+            try {
+                const jsonData = JSON.stringify(allUsers, null, 2);
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'البطاقات_الوطنية_نسخة_احتياطية.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('تم إنشاء نسخة احتياطية بنجاح', 'success');
+            } catch (error) {
+                console.error('خطأ في تصدير JSON:', error);
+                showNotification('حدث خطأ أثناء إنشاء النسخة الاحتياطية', 'error');
+            }
         });
 
+        // استيراد البيانات من ملف
         importBtn.addEventListener('click', () => {
             importFile.click();
         });
@@ -916,82 +1096,122 @@
                 loadingSpinner.style.display = 'block';
                 
                 if (file.name.endsWith('.json')) {
-                    const text = await file.text();
-                    const importedData = JSON.parse(text);
-                    let addedCount = 0;
-                    let updatedCount = 0;
-                    let skippedCount = 0;
-
-                    // إنشاء مجموعة من أرقام البطاقات الموجودة بالفعل لتجنب التكرار
-                    const existingIds = new Set(allUsers.map(user => user.idNumber));
-
-                    for (const user of importedData) {
-                        // التحقق من وجود رقم البطاقة في البيانات المستوردة
-                        if (!user.idNumber) {
-                            skippedCount++;
-                            continue;
-                        }
-
-                        // إذا كان رقم البطاقة موجودًا بالفعل، نتخطى هذه السجل
-                        if (existingIds.has(user.idNumber)) {
-                            skippedCount++;
-                            continue;
-                        }
-
-                        const userDocRef = doc(db, 'national_id_data', user.idNumber);
-                        const sanitizedUser = {
-                            fullName: sanitizeInput(user.fullName) || 'غير محدد',
-                            birthDate: user.birthDateRaw || '',
-                            gender: user.gender || 'غير محدد',
-                            maritalStatus: user.maritalStatus || 'غير محدد',
-                            address: sanitizeInput(user.address) || 'غير محدد',
-                            phoneNumber: sanitizeInput(user.phoneNumber) || 'غير محدد',
-                            idNumber: sanitizeInput(user.idNumber) || 'غير محدد',
-                            issueDate: user.issueDateRaw || '',
-                            expiryDate: user.expiryDateRaw || '',
-                            personalPhoto: user.personalPhoto || 'https://via.placeholder.com/90',
-                            createdAt: user.createdAtRaw || serverTimestamp(),
-                            updatedAt: serverTimestamp()
-                        };
-
-                        await setDoc(userDocRef, sanitizedUser);
-                        addedCount++;
-                        existingIds.add(user.idNumber); // إضافة رقم البطاقة إلى المجموعة
-                    }
-                    
-                    fetchUsers();
-                    showNotification(
-                        `تم استيراد البيانات بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث، ${skippedCount} تخطي (مكرر أو بدون رقم بطاقة)`,
-                        'success'
-                    );
+                    await importFromJson(file);
                 } else if (file.name.endsWith('.xlsx')) {
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
+                    await importFromExcel(file);
+                } else {
+                    showNotification('نوع الملف غير مدعوم. يرجى استخدام ملف JSON أو Excel', 'warning');
+                }
+            } catch (error) {
+                console.error('خطأ في الاستيراد:', error);
+                showNotification('حدث خطأ أثناء استيراد البيانات', 'error');
+            } finally {
+                importFile.value = '';
+                loadingSpinner.style.display = 'none';
+            }
+        });
+
+        // استيراد البيانات من ملف JSON
+        async function importFromJson(file) {
+            const text = await file.text();
+            const importedData = JSON.parse(text);
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            // إنشاء مجموعة من أرقام البطاقات الموجودة لتجنب التكرار
+            const existingIds = new Set(allUsers.map(user => user.idNumber));
+
+            // استخدام الدفعة (Batch) لتحسين الأداء
+            const batch = writeBatch(db);
+            const batchSize = 500;
+            let currentBatchSize = 0;
+
+            for (const user of importedData) {
+                if (!user.idNumber) {
+                    skippedCount++;
+                    continue;
+                }
+
+                if (existingIds.has(user.idNumber)) {
+                    skippedCount++;
+                    continue;
+                }
+
+                const userDocRef = doc(db, 'national_id_data', user.idNumber);
+                const sanitizedUser = {
+                    fullName: sanitizeInput(user.fullName) || 'غير محدد',
+                    birthDate: user.birthDateRaw || '',
+                    gender: user.gender || 'غير محدد',
+                    maritalStatus: user.maritalStatus || 'غير محدد',
+                    address: sanitizeInput(user.address) || 'غير محدد',
+                    phoneNumber: sanitizeInput(user.phoneNumber) || 'غير محدد',
+                    idNumber: sanitizeInput(user.idNumber) || 'غير محدد',
+                    issueDate: user.issueDateRaw || '',
+                    expiryDate: user.expiryDateRaw || '',
+                    personalPhoto: user.personalPhoto || 'https://via.placeholder.com/90',
+                    createdAt: user.createdAtRaw || serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                };
+
+                batch.set(userDocRef, sanitizedUser);
+                addedCount++;
+                existingIds.add(user.idNumber);
+                currentBatchSize++;
+
+                // تنفيذ الدفعة عند الوصول إلى الحجم المحدد
+                if (currentBatchSize >= batchSize) {
+                    await batch.commit();
+                    currentBatchSize = 0;
+                }
+            }
+
+            // تنفيذ أي عناصر متبقية في الدفعة
+            if (currentBatchSize > 0) {
+                await batch.commit();
+            }
+
+            fetchUsers();
+            showNotification(
+                `تم استيراد البيانات بنجاح: ${addedCount} إضافة، ${skippedCount} تخطي (مكرر أو بدون رقم بطاقة)`,
+                'success'
+            );
+        }
+
+        // استيراد البيانات من ملف Excel
+        async function importFromExcel(file) {
+            const reader = new FileReader();
+            
+            return new Promise((resolve, reject) => {
+                reader.onload = async (e) => {
+                    try {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         const jsonData = XLSX.utils.sheet_to_json(sheet);
                         let addedCount = 0;
-                        let updatedCount = 0;
                         let skippedCount = 0;
 
-                        // إنشاء مجموعة من أرقام البطاقات الموجودة بالفعل لتجنب التكرار
+                        // إنشاء مجموعة من أرقام البطاقات الموجودة لتجنب التكرار
                         const existingIds = new Set(allUsers.map(user => user.idNumber));
 
+                        // استخدام الدفعة (Batch) لتحسين الأداء
+                        const batch = writeBatch(db);
+                        const batchSize = 500;
+                        let currentBatchSize = 0;
+
                         for (const user of jsonData) {
-                            // التحقق من وجود رقم البطاقة في البيانات المستوردة
                             if (!user['رقم البطاقة']) {
                                 skippedCount++;
                                 continue;
                             }
 
-                            // إذا كان رقم البطاقة موجودًا بالفعل، نتخطى هذه السجل
-                            if (existingIds.has(user['رقم البطاقة'])) {
+                            const idNumber = sanitizeInput(user['رقم البطاقة']);
+                            if (existingIds.has(idNumber)) {
                                 skippedCount++;
                                 continue;
                             }
 
-                            const userDocRef = doc(db, 'national_id_data', user['رقم البطاقة']);
+                            const userDocRef = doc(db, 'national_id_data', idNumber);
                             const sanitizedUser = {
                                 fullName: sanitizeInput(user['الاسم الكامل']) || 'غير محدد',
                                 birthDate: user['تاريخ الميلاد'] || '',
@@ -1002,7 +1222,7 @@
                                               user['حالة الزواج'] === 'أرمل/أرملة' ? 'widowed' : 'غير محدد',
                                 address: sanitizeInput(user['العنوان']) || 'غير محدد',
                                 phoneNumber: sanitizeInput(user['رقم الهاتف']) || 'غير محدد',
-                                idNumber: sanitizeInput(user['رقم البطاقة']) || 'غير محدد',
+                                idNumber: idNumber,
                                 issueDate: user['تاريخ الإصدار'] || '',
                                 expiryDate: user['تاريخ الانتهاء'] || '',
                                 personalPhoto: 'https://via.placeholder.com/90',
@@ -1010,32 +1230,50 @@
                                 updatedAt: serverTimestamp()
                             };
 
-                            await setDoc(userDocRef, sanitizedUser);
+                            batch.set(userDocRef, sanitizedUser);
                             addedCount++;
-                            existingIds.add(user['رقم البطاقة']); // إضافة رقم البطاقة إلى المجموعة
+                            existingIds.add(idNumber);
+                            currentBatchSize++;
+
+                            // تنفيذ الدفعة عند الوصول إلى الحجم المحدد
+                            if (currentBatchSize >= batchSize) {
+                                await batch.commit();
+                                currentBatchSize = 0;
+                            }
                         }
-                        
+
+                        // تنفيذ أي عناصر متبقية في الدفعة
+                        if (currentBatchSize > 0) {
+                            await batch.commit();
+                        }
+
                         fetchUsers();
                         showNotification(
-                            `تم استيراد البيانات من Excel بنجاح: ${addedCount} إضافة، ${updatedCount} تحديث، ${skippedCount} تخطي (مكرر أو بدون رقم بطاقة)`,
+                            `تم استيراد البيانات من Excel بنجاح: ${addedCount} إضافة، ${skippedCount} تخطي (مكرر أو بدون رقم بطاقة)`,
                             'success'
                         );
-                    };
-                    reader.readAsArrayBuffer(file);
-                }
-            } catch (error) {
-                console.error('خطأ في الاستيراد:', error);
-                showNotification('حدث خطأ أثناء الاستيراد!', 'error');
-            } finally {
-                importFile.value = '';
-                loadingSpinner.style.display = 'none';
-            }
-        });
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
 
+        // ========== معالجات الأحداث ==========
+
+        // طباعة البيانات
         printBtn.addEventListener('click', () => {
+            if (allUsers.length === 0) {
+                showNotification('لا توجد بيانات للطباعة', 'warning');
+                return;
+            }
+
             const printContent = document.querySelector('.table-responsive').outerHTML;
             const win = window.open('', '', 'height=500,width=800');
-            win.document.write('<html><head><title>طباعة</title>');
+            win.document.write('<html><head><title>طباعة البطاقات الوطنية</title>');
             win.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">');
             win.document.write('<style>body { font-family: "Cairo", sans-serif; direction: rtl; } .expired { background-color: #fee2e2; } .active { background-color: #e6ffe6; } .warning { background-color: #fff3e0; } img { width: 80px; height: 80px; } .phone-number, .created-at { direction: ltr; font-family: monospace; text-align: left; } .created-at { white-space: normal; max-width: 200px; }</style>');
             win.document.write('</head><body>');
@@ -1045,22 +1283,35 @@
             win.print();
         });
 
-        refreshBtn.addEventListener('click', () => fetchUsers(searchInput.value, filterGender.value, currentPage));
+        // تحديث البيانات
+        refreshBtn.addEventListener('click', () => {
+            fetchUsers(searchInput.value, filterGender.value, currentPage);
+            showNotification('تم تحديث البيانات', 'success');
+        });
+
+        // حفظ التعديلات
         saveEditBtn.addEventListener('click', saveEdit);
+
+        // تأكيد الحذف
         confirmDeleteBtn.addEventListener('click', deleteUser);
 
-        searchInput.addEventListener('input', debounce(() => fetchUsers(searchInput.value, filterGender.value, 1), 300));
-        filterGender.addEventListener('change', () => fetchUsers(searchInput.value, filterGender.value, 1));
-        filterStatus.addEventListener('change', () => fetchUsers(searchInput.value, filterGender.value, 1));
+        // البحث والتصفية
+        searchInput.addEventListener('input', debounce(() => {
+            currentPage = 1;
+            fetchUsers(searchInput.value, filterGender.value, currentPage);
+        }, 300));
 
-        function debounce(func, wait) {
-            let timeout;
-            return function (...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func(...args), wait);
-            };
-        }
+        filterGender.addEventListener('change', () => {
+            currentPage = 1;
+            fetchUsers(searchInput.value, filterGender.value, currentPage);
+        });
 
+        filterStatus.addEventListener('change', () => {
+            currentPage = 1;
+            fetchUsers(searchInput.value, filterGender.value, currentPage);
+        });
+
+        // تحميل البيانات الأولية
         fetchUsers();
     </script>
 </body>
